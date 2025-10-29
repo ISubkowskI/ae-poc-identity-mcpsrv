@@ -11,19 +11,19 @@ The solution consists of three main components: the MCP client, the MCP Server (
 ```mermaid
 graph TD
     subgraph "Client Tool"
-        MCP Client
+        MCPClient["MCP Client<br/>(Implements Model Context Protocol)"]
     end
 
     subgraph "MCP Server (this repository)"
-        MCP Server["SSE transport<br/>(Implements Model Context Protocol)"]
+        MCPServer["SSE transport<br/>(Implements Model Context Protocol)"]
     end
 
     subgraph "Backend REST API Service (sample-identity-jwt)"
-        Rest API["External repository<br/>sample-identity-jwt<br/>(ae-sample-identity-webapi)"]
+        RestAPI["External repository<br/>sample-identity-jwt<br/>(ae-sample-identity-webapi)"]
     end
 
-    MCP Client -- "MCP over SSE" --> MCP Server
-    MCP Server -- "HTTP/REST for auth & data" --> RestAPI
+    MCPClient -- "MCP over SSE" --> MCPServer
+    MCPServer -- "HTTP/REST for auth & data" --> RestAPI
 ```
 
 ## Communicating with the backend REST API
