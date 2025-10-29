@@ -19,7 +19,7 @@ graph TD
     end
 
     subgraph "Backend Service (REST API)"
-        lblBackendService["External repository<br/>sample-identity-jwt<br/>ae-sample-identity-webapi.csproj"]
+        lblBackendService["External repository<br/>sample-identity-jwt<br/>(ae-sample-identity-webapi.csproj)"]
     end
 
     lblMCPClient -- "MCP over SSE (http://localhost:3001/identity/mcp)" <--> lblMCPServer
