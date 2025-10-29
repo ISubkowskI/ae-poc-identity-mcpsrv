@@ -1,8 +1,8 @@
-@baseUrl = http://localhost:3001
+@baseUrl = http://localhost:3001/identity
 // IMPORTANT: Replace the placeholder below with the actual value of
 // "ExpectedToken" from your appsettings.json file.
 @token = YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME
-@mcpSessionId = ZKphYb7Jcyr_PPYd0gtNlQ
+@mcpSessionId = wxkZ4oPFcT7kA1xlzxOlRg
 ## 2025-03-26
 @mcpProtocolVersion = 2025-06-18
 
@@ -40,7 +40,7 @@ Authorization: Bearer {{token}}
 }
 
 ###
-# 3. (TOOLS/CALL) - Run this request SECOND
+# 4. (TOOLS/CALL) - Run this request SECOND
 # (see mcp-listen.http)
 # The response will appear in the *first* request's window.
 POST {{baseUrl}}/mcp/message?sessionId={{mcpSessionId}}

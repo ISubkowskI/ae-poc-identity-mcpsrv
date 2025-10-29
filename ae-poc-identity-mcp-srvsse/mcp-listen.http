@@ -27,6 +27,6 @@
 ###  
 # > curl -N -v -H "Accept: text/event-stream" -H "Mcp-Session-Id: test-session-mcp" -H "MCP-Protocol-Version: 2025-06-18" -H "Authorization: Bearer YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME" "http://localhost:3001/mcp/sse"
 # > curl -N -v -H "Accept: text/event-stream, application/json" -H "Authorization: Bearer YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME" "http://localhost:3001/mcp/sse"
-curl -N -v -H "Accept: text/event-stream" -H "Authorization: Bearer YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME" "http://localhost:3001/mcp/sse"
+curl -N -v -H "Accept: text/event-stream" -H "Authorization: Bearer YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME" "http://localhost:3001/identity/mcp/sse"
 
 
