@@ -19,7 +19,7 @@ graph TD
     end
 
     subgraph "Backend Service (REST API)"
-        lblBackendService["External repository<br/>sample-identity-jwt<br/>(ae-sample-identity-webapi.csproj)"]
+        lblBackendService["External repository<br/>sample-identity-jwt<br/>ae-sample-identity-webapi.csproj"]
     end
 
     lblMCPClient -- "MCP over SSE (http://localhost:3001/identity/mcp)" <--> lblMCPServer
@@ -29,4 +29,5 @@ graph TD
 ## Communicating with the backend REST API
 Before running the application, you need to ensure the required API service is running. Please start the `ae-sample-identity-webapi` service from the `sample-identity-jwt` repository. Refer to the instructions within the `sample-identity-jwt` repository to build and run the service.
 
-
+## Testing the MCP Server
+You can use the provided `mcp-listen.http`, `requests.http` files to test the MCP server.
