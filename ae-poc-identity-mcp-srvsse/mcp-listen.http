@@ -1,0 +1,32 @@
+@baseUrl = http://localhost:3001
+@mcpInitSessionId = test-session-mcp
+@token = YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME
+## 2025-03-26
+@mcpProtocolVersion = 2025-06-18
+@mcpSessionId = rVFQYfGFvzLtvWhMdZ5dYA
+
+
+###
+# 1. (LISTEN) - Run this request FIRST
+# This requires the ae-poc-identity-mcp-srvsse project to be running.
+# This opens the SSE stream and waits for events.
+# The response window in Visual Studio will stay "loading..."
+# GET {{baseUrl}}/mcp/sse
+# Accept: text/event-stream, application/json
+# Mcp-Session-Id: {{mcpInitSessionId}}
+# Authorization: Bearer {{token}}
+# MCP-Protocol-Version: {{mcpProtocolVersion}}
+
+### terminal cmd
+# "Listen" Request
+# > curl -N -v \
+#    -H "Accept: text/event-stream" \
+#    -H "Mcp-Session-Id: my-test-session-123" \
+#    -H "Authorization: Bearer YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME" \
+#    "http://localhost:3001/mcp/sse"
+###  
+# > curl -N -v -H "Accept: text/event-stream" -H "Mcp-Session-Id: test-session-mcp" -H "MCP-Protocol-Version: 2025-06-18" -H "Authorization: Bearer YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME" "http://localhost:3001/mcp/sse"
+# > curl -N -v -H "Accept: text/event-stream, application/json" -H "Authorization: Bearer YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME" "http://localhost:3001/mcp/sse"
+curl -N -v -H "Accept: text/event-stream" -H "Authorization: Bearer YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME" "http://localhost:3001/mcp/sse"
+
+

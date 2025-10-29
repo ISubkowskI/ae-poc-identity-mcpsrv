@@ -28,16 +28,11 @@ public static class ClaimTools
     /// <param name="mapper">The AutoMapper instance for mapping entities to DTOs.</param>
     /// <param name="ct">Optional cancellation token.</param>
     /// <returns>A JSON string representing the list of claims.</returns>
-    [McpServerTool(Name = "identity-get_claims"), Description("Get a list of claims.")]
-    public static async Task<string> GetClaimsAsync(IClaimClient claimClient, IMapper mapper, CancellationToken ct = default)
+    [McpServerTool(UseStructuredContent = true, Name = "identity-get_claims"), Description("Get a list of claims.")]
+    public static async Task<IEnumerable<AppClaimOutgoingDto>> GetClaimsAsync(IClaimClient claimClient, IMapper mapper, CancellationToken ct = default)
     {
-        var claims = await claimClient.LoadClaimsAsync(ct).ConfigureAwait(false);
-        if (claims == null)
-        {
-            return JsonSerializer.Serialize(new List<AppClaimOutgoingDto>(), JsonSerializerOptions);
-        }
-        var res = mapper.Map<IEnumerable<AppClaimOutgoingDto>>(claims);
-        return JsonSerializer.Serialize(res, JsonSerializerOptions);
+        var claims = (await claimClient.LoadClaimsAsync(ct).ConfigureAwait(false)) ?? [];
+        return mapper.Map<IEnumerable<AppClaimOutgoingDto>>(claims);
     }
 
     /// <summary>
@@ -152,14 +147,20 @@ Expected JSON structure:
         // Validate claimId consistency and presence
         if (string.IsNullOrWhiteSpace(claimId))
         {
-            return JsonSerializer.Serialize(new ErrorOutgoingDto { Errors = ["The claimId path parameter cannot be empty."],
-                Status = "Validation Failed" }, JsonSerializerOptions);
+            return JsonSerializer.Serialize(new ErrorOutgoingDto
+            {
+                Errors = ["The claimId path parameter cannot be empty."],
+                Status = "Validation Failed"
+            }, JsonSerializerOptions);
         }
 
         if (claimId != claimDto.Id.ToString())
         {
-            return JsonSerializer.Serialize(new ErrorOutgoingDto { Errors = ["The claimId in the path must match the Id in the request body."],
-                Status = "Validation Failed" }, JsonSerializerOptions);
+            return JsonSerializer.Serialize(new ErrorOutgoingDto
+            {
+                Errors = ["The claimId in the path must match the Id in the request body."],
+                Status = "Validation Failed"
+            }, JsonSerializerOptions);
         }
 
         // Server-side validation using Data Annotations

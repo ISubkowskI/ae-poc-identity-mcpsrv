@@ -1,9 +1,8 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Ae.Poc.Identity.Mcp.Dtos;
+using Ae.Poc.Identity.Mcp.Settings;
+using Microsoft.Extensions.Options;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
-using System.Text.Json;
-using Ae.Poc.Identity.Mcp.Dtos;
-using Ae.Poc.Identity.Mcp.Settings;
 
 namespace Ae.Poc.Identity.Mcp.Tools;
 
@@ -15,13 +14,11 @@ namespace Ae.Poc.Identity.Mcp.Tools;
 [McpServerToolType]
 public static class AppInfoTool
 {
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new() { WriteIndented = false };
-
     /// <summary>
     /// Returns the current application version and time information as a JSON object.
     /// </summary>
-    [McpServerTool(Name = "general-get_app_version"), Description("Returns the current application version, local time, UTC time, and UTC ticks as a JSON object.")]
-    public static string GetAppVersion(IOptions<AppOptions> appOptions)
+    [McpServerTool(UseStructuredContent = true, Name = "general-get_app_version"), Description("Returns the current application version, local time, UTC time, and UTC ticks as a JSON object.")]
+    public static async Task<object> GetAppVersion(IOptions<AppOptions> appOptions)
     {
         string appVersion = appOptions?.Value?.Version ?? "?.?";
 
@@ -34,6 +31,6 @@ public static class AppInfoTool
             AppUtcTicks = dt.UtcTicks,
         };
 
-        return JsonSerializer.Serialize(dto, JsonSerializerOptions);
+        return await Task.FromResult(dto);
     }
 }

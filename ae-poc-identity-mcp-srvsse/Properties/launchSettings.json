@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ae-poc-identity-mcp-srvsse": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
