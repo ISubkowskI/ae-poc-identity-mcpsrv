@@ -6,24 +6,24 @@ This application communicates with a backend REST Web API to function.
 
 ## Architecture Overview
 
-The solution consists of three main components: the MCP Inspector (client), the MCP Server (this project), and a backend REST API for identity management. The MCP Server acts as a middle layer, handling requests from the client and communicating with the backend API for tasks like authentication.
+The solution consists of three main components: the MCP client, the MCP Server (this project), and a backend REST API for identity management. The MCP Server acts as a middle layer, handling requests from the client and communicating with the backend API for tasks like authentication.
 
 ```mermaid
 graph TD
     subgraph "Client Tool"
-        MCPClient
+        MCP Client
     end
 
     subgraph "MCP Server (this repository)"
-        MCPServer SSE transport<br/>(Implements Model Context Protocol)"]
+        MCP Server["SSE transport<br/>(Implements Model Context Protocol)"]
     end
 
     subgraph "Backend REST API Service (sample-identity-jwt)"
-        RestAPI["External repository<br/>sample-identity-jwt<br/>(ae-sample-identity-webapi)"]
+        Rest API["External repository<br/>sample-identity-jwt<br/>(ae-sample-identity-webapi)"]
     end
 
-    Inspector -- "MCP over STDIO or SSE" --> MCPServer
-    MCPServer -- "HTTP/REST for auth & data" --> RestAPI
+    MCP Client -- "MCP over SSE" --> MCP Server
+    MCP Server -- "HTTP/REST for auth & data" --> RestAPI
 ```
 
 ## Communicating with the backend REST API
