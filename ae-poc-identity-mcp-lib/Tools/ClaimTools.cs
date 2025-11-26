@@ -91,7 +91,7 @@ public static class ClaimTools
     {
         try
         {
-            if (!TryParseClaimId(claimId, out var parsedClaimId, out var errorMessage))
+            if (!TryParseClaimId(claimId, out _, out var errorMessage))
             {
                 return ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>([errorMessage ?? "Unknown validation error"]);
             }

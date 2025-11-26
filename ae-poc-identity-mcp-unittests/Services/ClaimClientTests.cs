@@ -164,4 +164,134 @@ public class ClaimClientTests
         Assert.NotNull(result);
         Assert.Equal(createdClaim.Id, result.Id);
     }
+
+    [Fact]
+    public async Task UpdateClaimAsync_ReturnsUpdatedClaim_OnSuccess()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var claim = new AppClaim { Id = id, Type = "updated" };
+        var dto = new AppClaimDto { Id = id, Type = "updated" };
+        var updatedDto = new AppClaimDto { Id = id, Type = "updated" };
+        var updatedClaim = new AppClaim { Id = id, Type = "updated" };
+
+        _mockMapper.Setup(m => m.Map<AppClaimDto>(claim)).Returns(dto);
+        _mockMapper.Setup(m => m.Map<AppClaim>(It.IsAny<AppClaimDto>())).Returns(updatedClaim);
+
+        _mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.Is<HttpRequestMessage>(r => r.Method == HttpMethod.Patch && r.RequestUri.ToString().Contains(id.ToString())),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = JsonContent.Create(updatedDto)
+            });
+
+        // Act
+        var result = await _claimClient.UpdateClaimAsync(id.ToString(), claim);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(id, result.Id);
+    }
+
+    [Fact]
+    public async Task DeleteClaimAsync_ReturnsDeletedClaim_OnSuccess()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var deletedDto = new AppClaimDto { Id = id, Type = "deleted" };
+        var deletedClaim = new AppClaim { Id = id, Type = "deleted" };
+
+        _mockMapper.Setup(m => m.Map<AppClaim>(It.IsAny<AppClaimDto>())).Returns(deletedClaim);
+
+        _mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.Is<HttpRequestMessage>(r => r.Method == HttpMethod.Delete && r.RequestUri.ToString().Contains(id.ToString())),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = JsonContent.Create(deletedDto)
+            });
+
+        // Act
+        var result = await _claimClient.DeleteClaimAsync(id.ToString());
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(id, result.Id);
+    }
+
+    [Fact]
+    public async Task LoadClaimsAsync_ThrowsHttpRequestException_OnHttpError()
+    {
+        // Arrange
+        _mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.InternalServerError,
+                Content = new StringContent("Server error")
+            });
+
+        // Act & Assert
+        await Assert.ThrowsAsync<HttpRequestException>(async () => await _claimClient.LoadClaimsAsync());
+    }
+
+    [Fact]
+    public async Task LoadClaimDetailsAsync_ThrowsInvalidOperationException_OnNullResponse()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+
+        _mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.Is<HttpRequestMessage>(r => r.RequestUri.ToString().Contains(id.ToString())),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = JsonContent.Create<AppClaimDto>(null)
+            });
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(async () => await _claimClient.LoadClaimDetailsAsync(id.ToString()));
+    }
+
+    [Fact]
+    public async Task CreateClaimAsync_ThrowsHttpRequestException_On404()
+    {
+        // Arrange
+        var claim = new AppClaim { Type = "test" };
+        var dto = new AppClaimDto { Type = "test" };
+
+        _mockMapper.Setup(m => m.Map<AppClaimDto>(claim)).Returns(dto);
+
+        _mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.Is<HttpRequestMessage>(r => r.Method == HttpMethod.Post),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.NotFound,
+                Content = new StringContent("Not found")
+            });
+
+        // Act & Assert
+        await Assert.ThrowsAsync<HttpRequestException>(async () => await _claimClient.CreateClaimAsync(claim));
+    }
 }
