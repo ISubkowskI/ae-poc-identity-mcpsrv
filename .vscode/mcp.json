@@ -1,0 +1,13 @@
+{
+	"servers": {
+		"my-mcp-server-e4582342": {
+			"url": "http://localhost:3001/identity/mcp",
+			"type": "sse",
+			"auth": {
+				"type": "bearer",
+				"token": "YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME"
+			}
+		}
+	},
+	"inputs": []
+}

@@ -11,11 +11,8 @@ namespace Ae.Poc.Identity.Mcp.Tools;
 /// <summary>
 /// Provides a collection of MCP server tools for managing and retrieving claims.
 /// This class contains static methods that expose claim-related functionality through the MCP server interface.
+/// All methods return JSON-serialized responses and map entities to DTOs via AutoMapper.
 /// </summary>
-/// <remarks>
-/// All methods in this class are exposed as MCP server tools and return JSON-serialized responses.
-/// The class uses AutoMapper for entity-to-DTO mapping and handles asynchronous claim operations.
-/// </remarks>
 [McpServerToolType]
 public static class ClaimTools
 {
@@ -24,156 +21,201 @@ public static class ClaimTools
     /// <summary>
     /// Retrieves a list of claims from the claim client, maps them to DTOs, and serializes the result to JSON.
     /// </summary>
-    /// <param name="claimClient">The client used to load claims.</param>
-    /// <param name="mapper">The AutoMapper instance for mapping entities to DTOs.</param>
-    /// <param name="ct">Optional cancellation token.</param>
-    /// <returns>A JSON string representing the list of claims.</returns>
-    [McpServerTool(UseStructuredContent = true, Name = "identity-get_claims"), Description("Get a list of claims.")]
-    public static async Task<IEnumerable<AppClaimOutgoingDto>> GetClaimsAsync(IClaimClient claimClient, IMapper mapper, CancellationToken ct = default)
+    [McpServerTool(Name = "identity-get_claims", UseStructuredContent = true)]
+    [Description("Retrieve a list of claims.")]
+    public static async Task<ToolResult<IEnumerable<AppClaimOutgoingDto>, ErrorOutgoingDto>> GetClaimsAsync(
+        IClaimClient claimClient,
+        IMapper mapper,
+        CancellationToken ct = default)
     {
-        var claims = (await claimClient.LoadClaimsAsync(ct).ConfigureAwait(false)) ?? [];
-        return mapper.Map<IEnumerable<AppClaimOutgoingDto>>(claims);
+        try
+        {
+            var claims = (await claimClient.LoadClaimsAsync(ct).ConfigureAwait(false));
+            if (claims == null)
+            {
+                return ToolResultFactory.Failure<IEnumerable<AppClaimOutgoingDto>>(["No claims found"], "Warning");
+            }
+
+            var res = mapper.Map<IEnumerable<AppClaimOutgoingDto>>(claims);
+            return ToolResultFactory.Success(res);
+        }
+        catch (Exception ex)
+        {
+            return ToolResultFactory.FromException<IEnumerable<AppClaimOutgoingDto>>(ex);
+        }
     }
 
     /// <summary>
     /// Retrieves the details of a specific claim by its ID, maps it to a DTO, and serializes the result to JSON.
     /// </summary>
-    /// <param name="claimId">The ID of the claim to retrieve.</param>
-    /// <param name="claimClient">The client used to load claim details.</param>
-    /// <param name="mapper">The AutoMapper instance for mapping entities to DTOs.</param>
-    /// <param name="ct">Optional cancellation token.</param>
-    /// <returns>A JSON string representing the claim details.</returns>
-    [McpServerTool(Name = "identity-get_claim_details"), Description("Get a claim by id.")]
-    public static async Task<string> GetClaimDetailsAsync(
+    [McpServerTool(Name = "identity-get_claim_details")]
+    [Description("Retrieve details for a single claim by id.")]
+    public static async Task<ToolResult<AppClaimOutgoingDto, ErrorOutgoingDto>> GetClaimDetailsAsync(
         [Description("The id of the claim to get details for")] string claimId,
         IClaimClient claimClient,
         IMapper mapper,
         CancellationToken ct = default)
     {
-        var claim = await claimClient.LoadClaimDetailsAsync(claimId, ct).ConfigureAwait(false);
-        var res = mapper.Map<AppClaimOutgoingDto>(claim);
-        return JsonSerializer.Serialize(res, JsonSerializerOptions);
+        try
+        {
+            if (!TryParseClaimId(claimId, out _, out var errorMessage))
+            {
+                return ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>([errorMessage ?? "Unknown validation error"]);
+            }
+
+            var claim = await claimClient.LoadClaimDetailsAsync(claimId, ct).ConfigureAwait(false);
+            if (claim is null)
+            {
+                return ToolResultFactory.Warning<AppClaimOutgoingDto>("Claim not found");
+            }
+
+            var res = mapper.Map<AppClaimOutgoingDto>(claim);
+            return ToolResultFactory.Success(res);
+        }
+        catch (Exception ex)
+        {
+            return ToolResultFactory.FromException<AppClaimOutgoingDto>(ex);
+        }
     }
 
     /// <summary>
     /// Deletes a claim by its ID, maps the deleted claim to a DTO, and serializes the result to JSON.
     /// </summary>
-    /// <param name="claimId">The ID of the claim to delete.</param>
-    /// <param name="claimClient">The client used to delete the claim.</param>
-    /// <param name="mapper">The AutoMapper instance for mapping entities to DTOs.</param>
-    /// <param name="ct">Optional cancellation token.</param>
-    /// <returns>A JSON string representing the deleted claim details.</returns>
-    [McpServerTool(Name = "identity-delete_claim"), Description("Delete a claim by id.")]
-    public static async Task<string> DeleteClaimAsync(
+    [McpServerTool(Name = "identity-delete_claim")]
+    [Description("Delete a claim by id.")]
+    public static async Task<ToolResult<AppClaimOutgoingDto, ErrorOutgoingDto>> DeleteClaimAsync(
         [Description("The id of the claim to delete")] string claimId,
         IClaimClient claimClient,
         IMapper mapper,
         CancellationToken ct = default)
     {
-        var deletedClaim = await claimClient.DeleteClaimAsync(claimId, ct).ConfigureAwait(false);
-        var res = mapper.Map<AppClaimOutgoingDto>(deletedClaim);
-        return JsonSerializer.Serialize(res, JsonSerializerOptions);
+        try
+        {
+            if (!TryParseClaimId(claimId, out var parsedClaimId, out var errorMessage))
+            {
+                return ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>([errorMessage ?? "Unknown validation error"]);
+            }
+
+            var deletedClaim = await claimClient.DeleteClaimAsync(claimId, ct).ConfigureAwait(false);
+            var res = mapper.Map<AppClaimOutgoingDto>(deletedClaim);
+            return ToolResultFactory.Success(res);
+        }
+        catch (Exception ex)
+        {
+            return ToolResultFactory.FromException<AppClaimOutgoingDto>(ex);
+        }
     }
 
     /// <summary>
     /// Creates a new claim using the provided DTO, maps it to the entity, and serializes the created claim to JSON.
     /// </summary>
-    /// <param name="claimDto">The DTO representing the claim to create.</param>
-    /// <param name="claimClient">The client used to create the claim.</param>
-    /// <param name="mapper">The AutoMapper instance for mapping DTOs to entities and vice versa.</param>
-    /// <param name="validator">The service used for validating the input DTO.</param>
-    /// <param name="ct">Optional cancellation token.</param>
-    /// <returns>A JSON string representing the created claim details.</returns>
-    [McpServerTool(Name = "identity-create_claim"), Description("Create a new claim.")]
-    public static async Task<string> CreateClaimAsync(
-        [Description(@"The data for the new claim. The 'Id' will be generated by the server.
-Expected JSON structure: 
-{ 
-  ""Type"": ""string"", 
-  ""Value"": ""string"", 
-  ""ValueType"": ""string"", 
-  ""DisplayText"": ""string"", 
-  ""Properties"": { ""key1"": ""value1"", ""key2"": ""value2"", ... } (optional dictionary of string key-value pairs), 
-  ""Description"": ""string"" (optional, max 500 chars) 
+    [McpServerTool(Name = "identity-create_claim")]
+    [Description("Create a new claim.")]
+    public static async Task<ToolResult<AppClaimOutgoingDto, ErrorOutgoingDto>> CreateClaimAsync(
+        [Description(@"The data for the new claim. The server will assign the 'Id'.
+Expected JSON structure:
+{
+  ""Type"": ""string"",
+  ""Value"": ""string"",
+  ""ValueType"": ""string"",
+  ""DisplayText"": ""string"",
+  ""Properties"": { ""key1"": ""value1"", ... } (optional),
+  ""Description"": ""string"" (optional, max 500 chars)
 }")] AppClaimCreateDto claimDto,
         IClaimClient claimClient,
         IMapper mapper,
         IDtoValidator validator,
         CancellationToken ct = default)
     {
-        // Server-side validation using Data Annotations
-        if (!validator.TryValidate(claimDto, out var validationResults))
+        try
         {
-            // Validation failed, return error details
-            var errors = validationResults.Select(r => r.ErrorMessage);
-            return JsonSerializer.Serialize(new ErrorOutgoingDto { Errors = errors, Status = "Validation Failed" }, JsonSerializerOptions);
-        }
+            if (!validator.TryValidate(claimDto, out var validationResults))
+            {
+                var errors = validationResults.Select(r => r.ErrorMessage ?? "Unknown validation error").ToArray();
+                return ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>(errors);
+            }
 
-        var appClaim = mapper.Map<AppClaim>(claimDto);
-        var createdClaim = await claimClient.CreateClaimAsync(appClaim, ct).ConfigureAwait(false);
-        var res = mapper.Map<AppClaimOutgoingDto>(createdClaim);
-        return JsonSerializer.Serialize(res, JsonSerializerOptions);
+            var appClaim = mapper.Map<AppClaim>(claimDto);
+            var createdClaim = await claimClient.CreateClaimAsync(appClaim, ct).ConfigureAwait(false);
+            var res = mapper.Map<AppClaimOutgoingDto>(createdClaim);
+            return ToolResultFactory.Success(res);
+        }
+        catch (Exception ex)
+        {
+            return ToolResultFactory.FromException<AppClaimOutgoingDto>(ex);
+        }
     }
 
     /// <summary>
     /// Updates an existing claim by its ID using the provided DTO, maps it to the entity, and serializes the updated claim to JSON.
     /// </summary>
-    /// <param name="claimId">The ID of the claim to update.</param>
-    /// <param name="claimDto">The DTO representing the updated claim data.</param>
-    /// <param name="claimClient">The client used to update the claim.</param>
-    /// <param name="mapper">The AutoMapper instance for mapping DTOs to entities and vice versa.</param>
-    /// <param name="validator">The service used for validating the input DTO.</param>
-    /// <param name="ct">Optional cancellation token.</param>
-    /// <returns>A JSON string representing the updated claim details.</returns>
-    [McpServerTool(Name = "identity-update_claim"), Description("Update a claim by id.")]
-    public static async Task<string> UpdateClaimAsync(
+    [McpServerTool(Name = "identity-update_claim")]
+    [Description("Update a claim by id.")]
+    public static async Task<ToolResult<AppClaimOutgoingDto, ErrorOutgoingDto>> UpdateClaimAsync(
         [Description("The id of the claim to update")] string claimId,
         [Description(@"The data to update the claim. The 'Id' in the body must match the 'claimId' in the path.
-Expected JSON structure: 
-{ 
+Expected JSON structure:
+{
   ""Id"": ""guid_string"",
-  ""Type"": ""string"", 
-  ""Value"": ""string"", 
-  ""ValueType"": ""string"", 
-  ""DisplayText"": ""string"", 
-  ""Properties"": { ""key1"": ""value1"", ... } (optional dictionary of string key-value pairs), 
-  ""Description"": ""string"" (optional, max 500 chars) 
+  ""Type"": ""string"",
+  ""Value"": ""string"",
+  ""ValueType"": ""string"",
+  ""DisplayText"": ""string"",
+  ""Properties"": { ""key1"": ""value1"", ... } (optional),
+  ""Description"": ""string"" (optional, max 500 chars)
 }")] AppClaimUpdateDto claimDto,
         IClaimClient claimClient,
         IMapper mapper,
         IDtoValidator validator,
         CancellationToken ct = default)
     {
-        // Validate claimId consistency and presence
+        try
+        {
+            if (!TryParseClaimId(claimId, out var parsedClaimId, out var errorMessage))
+            {
+                return ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>([errorMessage ?? "Unknown validation error"]);
+            }
+
+            // Compare claimId with claimDto.Id
+            if (parsedClaimId != claimDto.Id)
+            {
+                return ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>(["The claimId path parameter must match the Id field in the request body."]);
+            }
+
+            if (!validator.TryValidate(claimDto, out var validationResults))
+            {
+                var errors = validationResults.Select(r => r.ErrorMessage ?? "Unknown validation error").ToArray();
+                return ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>(errors);
+            }
+
+            var appClaim = mapper.Map<AppClaim>(claimDto);
+            var updatedClaim = await claimClient.UpdateClaimAsync(claimId, appClaim, ct).ConfigureAwait(false);
+            var res = mapper.Map<AppClaimOutgoingDto>(updatedClaim);
+            return ToolResultFactory.Success(res);
+        }
+        catch (Exception ex)
+        {
+            return ToolResultFactory.FromException<AppClaimOutgoingDto>(ex);
+        }
+    }
+
+    private static bool TryParseClaimId(string claimId, out Guid parsedId, out string? errorMessage)
+    {
         if (string.IsNullOrWhiteSpace(claimId))
         {
-            return JsonSerializer.Serialize(new ErrorOutgoingDto
-            {
-                Errors = ["The claimId path parameter cannot be empty."],
-                Status = "Validation Failed"
-            }, JsonSerializerOptions);
+            errorMessage = "The claimId path parameter cannot be empty.";
+            parsedId = Guid.Empty;
+            return false;
         }
 
-        if (claimId != claimDto.Id.ToString())
+        if (!Guid.TryParse(claimId, out parsedId))
         {
-            return JsonSerializer.Serialize(new ErrorOutgoingDto
-            {
-                Errors = ["The claimId in the path must match the Id in the request body."],
-                Status = "Validation Failed"
-            }, JsonSerializerOptions);
+            errorMessage = "The claimId path parameter must be a valid GUID.";
+            return false;
         }
 
-        // Server-side validation using Data Annotations
-        if (!validator.TryValidate(claimDto, out var validationResults))
-        {
-            // Validation failed, return error details
-            var errors = validationResults.Select(r => r.ErrorMessage);
-            return JsonSerializer.Serialize(new ErrorOutgoingDto { Errors = errors, Status = "Validation Failed" }, JsonSerializerOptions);
-        }
-
-        var appClaim = mapper.Map<AppClaim>(claimDto);
-        var updatedClaim = await claimClient.UpdateClaimAsync(claimId, appClaim, ct).ConfigureAwait(false);
-        var res = mapper.Map<AppClaimOutgoingDto>(updatedClaim);
-        return JsonSerializer.Serialize(res, JsonSerializerOptions);
+        errorMessage = null;
+        return true;
     }
+
 }

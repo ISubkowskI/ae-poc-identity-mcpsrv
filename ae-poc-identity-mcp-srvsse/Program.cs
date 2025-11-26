@@ -9,18 +9,18 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System.Reflection;
+using Polly;
+using Polly.Extensions.Http;
 
-Log.Logger = new LoggerConfiguration()
-           .MinimumLevel.Verbose()
-           //.WriteTo.Debug()
-           .WriteTo.Console(standardErrorFromLevel: Serilog.Events.LogEventLevel.Verbose)
-           .CreateBootstrapLogger();
+var logConfig = new LoggerConfiguration()
+    .MinimumLevel.Verbose()
+    .WriteTo.Console(standardErrorFromLevel: Serilog.Events.LogEventLevel.Verbose);
+Log.Logger = logConfig.CreateBootstrapLogger();
 
 try
 {
-    Log.Debug("App starting ... '{Env}' Working directory: '{Directory}'",
-      Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? string.Empty,
-      Environment.CurrentDirectory);
+    Log.Debug("App starting ... '{Env}' Working directory: '{CurrentDirectory}'",
+      Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? string.Empty, Environment.CurrentDirectory);
     var exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
     var builder = WebApplication.CreateBuilder(args);
@@ -43,7 +43,7 @@ try
     builder.Services.AddHttpClient<IClaimClient, ClaimClient>();
 
     var appOptions = builder.Configuration.GetSection(AppOptions.App).Get<AppOptions>() ?? new AppOptions();
-    Log.Information($"{appOptions.Name} ver:{appOptions.Version}");
+    Log.Information("{AppName} ver:{AppVersion}", appOptions.Name, appOptions.Version);
 
     // Add Authentication Services
     var srvAuthOptions = builder.Configuration.GetSection(ServerAuthenticationOptions.Authentication)
