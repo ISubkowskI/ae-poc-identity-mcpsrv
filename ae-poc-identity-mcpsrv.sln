@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ae-poc-identity-mcp-unittes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ae-poc-identity-mcp-integrationtests", "ae-poc-identity-mcp-integrationtests\ae-poc-identity-mcp-integrationtests.csproj", "{817443FE-F24F-4B92-99CF-9A6970EC1D30}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ae-poc-identity-mcp-benchmark", "ae-poc-identity-mcp-benchmark\ae-poc-identity-mcp-benchmark.csproj", "{F1A649FD-DCF1-6F71-3FC7-4929E2B488C5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,18 @@ Global
 		{817443FE-F24F-4B92-99CF-9A6970EC1D30}.Release|x64.Build.0 = Release|Any CPU
 		{817443FE-F24F-4B92-99CF-9A6970EC1D30}.Release|x86.ActiveCfg = Release|Any CPU
 		{817443FE-F24F-4B92-99CF-9A6970EC1D30}.Release|x86.Build.0 = Release|Any CPU
+		{F1A649FD-DCF1-6F71-3FC7-4929E2B488C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1A649FD-DCF1-6F71-3FC7-4929E2B488C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1A649FD-DCF1-6F71-3FC7-4929E2B488C5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F1A649FD-DCF1-6F71-3FC7-4929E2B488C5}.Debug|x64.Build.0 = Debug|Any CPU
+		{F1A649FD-DCF1-6F71-3FC7-4929E2B488C5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F1A649FD-DCF1-6F71-3FC7-4929E2B488C5}.Debug|x86.Build.0 = Debug|Any CPU
+		{F1A649FD-DCF1-6F71-3FC7-4929E2B488C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1A649FD-DCF1-6F71-3FC7-4929E2B488C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1A649FD-DCF1-6F71-3FC7-4929E2B488C5}.Release|x64.ActiveCfg = Release|Any CPU
+		{F1A649FD-DCF1-6F71-3FC7-4929E2B488C5}.Release|x64.Build.0 = Release|Any CPU
+		{F1A649FD-DCF1-6F71-3FC7-4929E2B488C5}.Release|x86.ActiveCfg = Release|Any CPU
+		{F1A649FD-DCF1-6F71-3FC7-4929E2B488C5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

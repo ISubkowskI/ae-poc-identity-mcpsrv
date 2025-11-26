@@ -16,8 +16,6 @@ namespace Ae.Poc.Identity.Mcp.Tools;
 [McpServerToolType]
 public static class ClaimTools
 {
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new() { WriteIndented = false };
-
     /// <summary>
     /// Retrieves a list of claims from the claim client, maps them to DTOs, and serializes the result to JSON.
     /// </summary>
