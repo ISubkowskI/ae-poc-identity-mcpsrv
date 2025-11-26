@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ae-poc-identity-mcp-integra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ae-poc-identity-mcp-benchmark", "ae-poc-identity-mcp-benchmark\ae-poc-identity-mcp-benchmark.csproj", "{F1A649FD-DCF1-6F71-3FC7-4929E2B488C5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -108,6 +110,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F7160DA1-2F0E-4A07-821F-AABF295A9C8E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{817443FE-F24F-4B92-99CF-9A6970EC1D30} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{F1A649FD-DCF1-6F71-3FC7-4929E2B488C5} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8817B1BE-7DE7-4E97-B84F-ED8EAF85F29E}

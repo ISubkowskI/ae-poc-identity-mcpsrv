@@ -66,8 +66,8 @@ public class ClaimToolsTests
     {
         // Arrange
         var dto = new AppClaimCreateDto();
-        ICollection<ValidationResult> validationResults = new List<ValidationResult> { new("Invalid") };
-        
+        ICollection<ValidationResult> validationResults = [new ValidationResult("Invalid")];
+
         _mockValidator.Setup(v => v.TryValidate(dto, out validationResults))
             .Returns(false);
 
@@ -90,7 +90,7 @@ public class ClaimToolsTests
         var claim = new AppClaim { Type = "test" };
         var createdClaim = new AppClaim { Id = Guid.NewGuid(), Type = "test" };
         var outgoingDto = new AppClaimOutgoingDto { Id = createdClaim.Id, Type = "test" };
-        ICollection<ValidationResult> validationResults = new List<ValidationResult>();
+        ICollection<ValidationResult> validationResults = [];
 
         _mockValidator.Setup(v => v.TryValidate(dto, out validationResults))
             .Returns(true);
@@ -308,7 +308,7 @@ public class ClaimToolsTests
         var claim = new AppClaim { Id = id, Type = "updated" };
         var updatedClaim = new AppClaim { Id = id, Type = "updated" };
         var outgoingDto = new AppClaimOutgoingDto { Id = id, Type = "updated" };
-        ICollection<ValidationResult> validationResults = new List<ValidationResult>();
+        ICollection<ValidationResult> validationResults = [];
 
         _mockValidator.Setup(v => v.TryValidate(dto, out validationResults))
             .Returns(true);
@@ -333,7 +333,7 @@ public class ClaimToolsTests
         // Arrange
         var id = Guid.NewGuid();
         var dto = new AppClaimUpdateDto { Id = id };
-        ICollection<ValidationResult> validationResults = new List<ValidationResult> { new("Type is required") };
+        ICollection<ValidationResult> validationResults = [new ValidationResult("Type is required")];
 
         _mockValidator.Setup(v => v.TryValidate(dto, out validationResults))
             .Returns(false);
@@ -393,7 +393,7 @@ public class ClaimToolsTests
         var id = Guid.NewGuid();
         var dto = new AppClaimUpdateDto { Id = id, Type = "test", Value = "test", ValueType = "string", DisplayText = "Test" };
         var claim = new AppClaim { Id = id, Type = "test" };
-        ICollection<ValidationResult> validationResults = new List<ValidationResult>();
+        ICollection<ValidationResult> validationResults = [];
 
         _mockValidator.Setup(v => v.TryValidate(dto, out validationResults))
             .Returns(true);

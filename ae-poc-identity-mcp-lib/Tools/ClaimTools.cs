@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
-using System.Text.Json;
 using Ae.Poc.Identity.Mcp.Dtos;
 using Ae.Poc.Identity.Mcp.Services;
 using Ae.Poc.Identity.Mcp.Data;
@@ -209,6 +208,12 @@ Expected JSON structure:
         if (!Guid.TryParse(claimId, out parsedId))
         {
             errorMessage = "The claimId path parameter must be a valid GUID.";
+            return false;
+        }
+
+        if (parsedId == Guid.Empty)
+        {
+            errorMessage = "The claimId path parameter cannot be an empty GUID.";
             return false;
         }
 

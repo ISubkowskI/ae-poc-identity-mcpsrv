@@ -9,6 +9,7 @@ using Moq;
 using Moq.Protected;
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Claims;
 using Xunit;
 
 namespace Ae.Poc.Identity.Mcp.Unittests.Services;
@@ -76,7 +77,7 @@ public class ClaimClientTests
     }
 
     [Fact]
-    public async Task LoadClaimsAsync_ReturnsEmpty_OnNullResponse()
+    public async Task LoadClaimsAsync_ReturnsNull_OnNullResponse()
     {
         // Arrange
         _mockHttpMessageHandler.Protected()
@@ -98,8 +99,7 @@ public class ClaimClientTests
         var result = await _claimClient.LoadClaimsAsync();
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Empty(result);
+        Assert.Null(result);
     }
 
     [Fact]
@@ -249,7 +249,7 @@ public class ClaimClientTests
     }
 
     [Fact]
-    public async Task LoadClaimDetailsAsync_ThrowsInvalidOperationException_OnNullResponse()
+    public async Task LoadClaimDetailsAsync_ReturnNull_OnNullResponse()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -266,8 +266,11 @@ public class ClaimClientTests
                 Content = JsonContent.Create<AppClaimDto>(null)
             });
 
-        // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(async () => await _claimClient.LoadClaimDetailsAsync(id.ToString()));
+        // Act 
+        var result = await _claimClient.LoadClaimDetailsAsync(id.ToString());
+
+        // Assert
+        Assert.Null(result);
     }
 
     [Fact]

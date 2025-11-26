@@ -12,6 +12,8 @@ namespace Ae.Poc.Identity.Mcp.Authentication;
 public sealed class ServerFixedTokenAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
     private const string McpClientIdentifier = "mcp-client";
+
+    private readonly ILogger<ServerFixedTokenAuthenticationHandler> _logger;
     private readonly ServerAuthenticationOptions _srvAuthOptions;
 
     public ServerFixedTokenAuthenticationHandler(
@@ -22,12 +24,14 @@ public sealed class ServerFixedTokenAuthenticationHandler : AuthenticationHandle
         : base(options, logger, encoder)
     {
         _srvAuthOptions = serverAuthenticationOptions?.Value ?? throw new ArgumentNullException(nameof(serverAuthenticationOptions));
+        _logger = logger.CreateLogger<ServerFixedTokenAuthenticationHandler>();
     }
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         if (!Request.Headers.TryGetValue(HeaderNames.Authorization, out var authorizationHeaderValues))
         {
+            _logger.LogDebug("Authorization header is missing. {MethodName}", nameof(HandleAuthenticateAsync));
             return Task.FromResult(AuthenticateResult.NoResult());
         }
 
@@ -42,9 +46,9 @@ public sealed class ServerFixedTokenAuthenticationHandler : AuthenticationHandle
         }
 
         var expectedToken = _srvAuthOptions.ExpectedToken;
-        if (string.IsNullOrEmpty(expectedToken))
+        if (string.IsNullOrWhiteSpace(expectedToken))
         {
-            Logger.LogError("Authentication:ExpectedToken is not configured.");
+            _logger.LogError("Authentication:ExpectedToken is not configured.");
             return Task.FromResult(AuthenticateResult.Fail("Server configuration error for authentication."));
         }
 
@@ -58,6 +62,7 @@ public sealed class ServerFixedTokenAuthenticationHandler : AuthenticationHandle
             return Task.FromResult(AuthenticateResult.Success(ticket));
         }
 
+        _logger.LogWarning("Invalid token. {MethodName}", nameof(HandleAuthenticateAsync));
         return Task.FromResult(AuthenticateResult.Fail("Invalid token."));
     }
 }

@@ -19,8 +19,8 @@ Log.Logger = logConfig.CreateBootstrapLogger();
 
 try
 {
-    Log.Debug("App starting ... '{Env}' Working directory: '{CurrentDirectory}'",
-      Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? string.Empty, Environment.CurrentDirectory);
+    Log.Debug("App starting ... '{Env}'", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? string.Empty);
+    Log.Debug("Working directory: '{CurrentDirectory}'", Environment.CurrentDirectory);
     var exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
     var builder = WebApplication.CreateBuilder(args);

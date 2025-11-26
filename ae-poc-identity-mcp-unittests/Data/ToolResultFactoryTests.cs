@@ -179,7 +179,7 @@ public class ToolResultFactoryTests
         Assert.NotNull(result.Error);
         Assert.Equal("Error", result.Error.Status);
         Assert.Single(result.Error.Errors);
-        Assert.Contains("Something went wrong", result.Error.Errors);
+        Assert.Contains("InvalidOperationException: Something went wrong", result.Error.Errors);
     }
 
     [Fact]
@@ -191,7 +191,7 @@ public class ToolResultFactoryTests
         // Assert
         Assert.False(result.IsSuccess);
         Assert.NotNull(result.Error);
-        Assert.Contains("Unknown exception message.", result.Error.Errors);
+        Assert.Contains(": Unknown exception.", result.Error.Errors);
     }
 
     [Fact]

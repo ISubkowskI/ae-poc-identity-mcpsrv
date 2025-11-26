@@ -4,6 +4,12 @@ namespace Ae.Poc.Identity.Mcp.Data
 {
     public static class ToolResultFactory
     {
+        /// <summary>
+        /// Creates a successful tool result with the specified value.
+        /// </summary>
+        /// <typeparam name="T">The type of the success value.</typeparam>
+        /// <param name="value">The value to return on success.</param>
+        /// <returns>A successful <see cref="ToolResult{T, ErrorOutgoingDto}"/> containing the value.</returns>
         public static ToolResult<T, ErrorOutgoingDto> Success<T>(T value) => new()
         {
             IsSuccess = true,
@@ -11,7 +17,7 @@ namespace Ae.Poc.Identity.Mcp.Data
             Error = null
         };
 
-        public static ToolResult<T, ErrorOutgoingDto> ValidationFailed<T>(IEnumerable<string> validationWarnings, string status = "Validation Failed")
+        public static ToolResult<T, ErrorOutgoingDto> ValidationFailed<T>(IEnumerable<string> validationWarnings, string status = ToolResultStatus.ValidationFailed)
         {
             if (validationWarnings == null || !validationWarnings.Any())
             {
@@ -30,7 +36,7 @@ namespace Ae.Poc.Identity.Mcp.Data
             };
         }
 
-        public static ToolResult<T, ErrorOutgoingDto> Warning<T>(string message, string status = "Warning") => new()
+        public static ToolResult<T, ErrorOutgoingDto> Warning<T>(string message, string status = ToolResultStatus.Warning) => new()
         {
             IsSuccess = false,
             Value = default,
@@ -42,7 +48,7 @@ namespace Ae.Poc.Identity.Mcp.Data
         };
 
 
-        public static ToolResult<T, ErrorOutgoingDto> Failure<T>(IEnumerable<string> errors, string status = "Error")
+        public static ToolResult<T, ErrorOutgoingDto> Failure<T>(IEnumerable<string> errors, string status = ToolResultStatus.Error)
         {
             if (errors == null || !errors.Any())
             {
@@ -61,14 +67,16 @@ namespace Ae.Poc.Identity.Mcp.Data
             };
         }
 
-        public static ToolResult<T, ErrorOutgoingDto> FromException<T>(Exception ex) => new()
+        public static ToolResult<T, ErrorOutgoingDto> FromException<T>(Exception ex, bool includeStackTrace = false) => new()
         {
             IsSuccess = false,
             Value = default,
             Error = new ErrorOutgoingDto
             {
-                Errors = [ex?.Message ?? "Unknown exception message."],
-                Status = "Error"
+                Errors = includeStackTrace
+                ? [ex?.ToString() ?? "Unknown exception."]
+                : [$"{ex?.GetType().Name}: {ex?.Message ?? "Unknown exception."}"],
+                Status = ToolResultStatus.Error
             }
         };
 

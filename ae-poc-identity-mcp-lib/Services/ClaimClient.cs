@@ -79,7 +79,7 @@ public sealed class ClaimClient : IClaimClient
     /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains an enumerable of <see cref="AppClaim"/>.</returns>
     /// <exception cref="HttpRequestException">Thrown if the HTTP request fails.</exception>
-    public async Task<IEnumerable<AppClaim>> LoadClaimsAsync(CancellationToken ct = default)
+    public async Task<IEnumerable<AppClaim>?> LoadClaimsAsync(CancellationToken ct = default)
     {
         string requestUri = Flurl.Url.Combine(_apiOptions.ApiBasePath, ClaimsApiBaseEndpoint);
         _logger.LogInformation("Start {MethodName} for {RequestUri}...", nameof(LoadClaimsAsync), requestUri);
@@ -87,8 +87,7 @@ public sealed class ClaimClient : IClaimClient
         try
         {
             var dtoList = await _httpClient.GetFromJsonAsync<IEnumerable<AppClaimDto>>(requestUri: requestUri, cancellationToken: ct).ConfigureAwait(false);
-            // Prefer returning an empty collection over null if the API or mapper could produce a null list.
-            return _mapper.Map<IEnumerable<AppClaim>>(dtoList) ?? [];
+            return _mapper.Map<IEnumerable<AppClaim>?>(dtoList);
         }
         catch (HttpRequestException httpEx)
         {
@@ -110,7 +109,7 @@ public sealed class ClaimClient : IClaimClient
     /// <returns>A task that represents the asynchronous operation. The task result contains the <see cref="AppClaim"/> details.</returns>
     /// <exception cref="InvalidOperationException">Thrown if the API returns a null DTO when a valid DTO was expected.</exception>
     /// <exception cref="HttpRequestException">Thrown if the HTTP request fails.</exception>
-    public async Task<AppClaim> LoadClaimDetailsAsync(string claimId, CancellationToken ct = default)
+    public async Task<AppClaim?> LoadClaimDetailsAsync(string claimId, CancellationToken ct = default)
     {
         string requestUri = Flurl.Url.Combine(_apiOptions.ApiBasePath, ClaimsApiBaseEndpoint, claimId);
         _logger.LogInformation("Start {MethodName} for {RequestUri}...", nameof(LoadClaimDetailsAsync), requestUri);
@@ -118,11 +117,7 @@ public sealed class ClaimClient : IClaimClient
         try
         {
             var res = await _httpClient.GetFromJsonAsync<AppClaimDto>(requestUri: requestUri, cancellationToken: ct).ConfigureAwait(false);
-            if (res == null)
-            {
-                throw new InvalidOperationException($"API returned null DTO for claim '{claimId}' at {requestUri}, but a valid {nameof(AppClaimDto)} was expected.");
-            }
-            return _mapper.Map<AppClaim>(res);
+            return _mapper.Map<AppClaim?>(res);
         }
         catch (HttpRequestException httpEx)
         {

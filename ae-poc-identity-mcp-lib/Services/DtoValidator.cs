@@ -1,4 +1,4 @@
-﻿﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Ae.Poc.Identity.Mcp.Services;
 
@@ -17,8 +17,8 @@ public sealed class DtoValidator : IDtoValidator
     /// <returns><c>true</c> if the <paramref name="obj"/> is valid; otherwise, <c>false</c>.</returns>
     public bool TryValidate(object obj, out ICollection<ValidationResult> validationResults)
     {
-        var validationContext = new ValidationContext(obj, serviceProvider: null, items: null);
-        var results = new List<ValidationResult>();
+        ValidationContext validationContext = new(obj, serviceProvider: null, items: null);
+        List<ValidationResult> results = [];
         bool isValid = Validator.TryValidateObject(obj, validationContext, results, validateAllProperties: true);
         validationResults = results;
         return isValid;
