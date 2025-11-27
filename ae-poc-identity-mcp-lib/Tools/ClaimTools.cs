@@ -30,7 +30,7 @@ public static class ClaimTools
         try
         {
             //logger?.LogInformation("Retrieving all claims");
-            var claims = (await claimClient.LoadClaimsAsync(ct).ConfigureAwait(false));
+            var claims = (await claimClient.LoadClaimsAsync(ct));
             if (claims == null)
             {
                 //logger?.LogWarning("No claims found in the system");
@@ -72,7 +72,7 @@ public static class ClaimTools
                 return ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>([errorMessage ?? "Unknown validation error"]);
             }
 
-            var claim = await claimClient.LoadClaimDetailsAsync(claimId, ct).ConfigureAwait(false);
+            var claim = await claimClient.LoadClaimDetailsAsync(claimId, ct);
             if (claim is null)
             {
                 return ToolResultFactory.Warning<AppClaimOutgoingDto>("Claim not found");
@@ -105,7 +105,7 @@ public static class ClaimTools
                 return ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>([errorMessage ?? "Unknown validation error"]);
             }
 
-            var deletedClaim = await claimClient.DeleteClaimAsync(claimId, ct).ConfigureAwait(false);
+            var deletedClaim = await claimClient.DeleteClaimAsync(claimId, ct);
             var res = mapper.Map<AppClaimOutgoingDto>(deletedClaim);
             return ToolResultFactory.Success(res);
         }
@@ -145,7 +145,7 @@ Expected JSON structure:
             }
 
             var appClaim = mapper.Map<AppClaim>(claimDto);
-            var createdClaim = await claimClient.CreateClaimAsync(appClaim, ct).ConfigureAwait(false);
+            var createdClaim = await claimClient.CreateClaimAsync(appClaim, ct);
             var res = mapper.Map<AppClaimOutgoingDto>(createdClaim);
             return ToolResultFactory.Success(res);
         }
@@ -198,7 +198,7 @@ Expected JSON structure:
             }
 
             var appClaim = mapper.Map<AppClaim>(claimDto);
-            var updatedClaim = await claimClient.UpdateClaimAsync(claimId, appClaim, ct).ConfigureAwait(false);
+            var updatedClaim = await claimClient.UpdateClaimAsync(claimId, appClaim, ct);
             var res = mapper.Map<AppClaimOutgoingDto>(updatedClaim);
             return ToolResultFactory.Success(res);
         }
