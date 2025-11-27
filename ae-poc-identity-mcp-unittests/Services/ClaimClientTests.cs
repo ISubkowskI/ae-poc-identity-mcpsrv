@@ -297,4 +297,54 @@ public class ClaimClientTests
         // Act & Assert
         await Assert.ThrowsAsync<HttpRequestException>(async () => await _claimClient.CreateClaimAsync(claim));
     }
+
+    [Fact]
+    public async Task LoadClaimsAsync_ThrowsTaskCanceledException_WhenCancelled()
+    {
+        // Arrange
+        var cts = new CancellationTokenSource();
+
+        _mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent("Ok_Ok")
+            });
+
+
+        cts.Cancel(); // Cancel immediately
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            async () => await _claimClient.LoadClaimsAsync(cts.Token));
+    }
+
+    [Fact]
+    public async Task LoadClaimsAsync_ThrowsHttpRequestException_On401Unauthorized()
+    {
+        // Arrange
+        _mockHttpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.Unauthorized,
+                Content = new StringContent("Unauthorized access")
+            });
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<HttpRequestException>(
+            async () => await _claimClient.LoadClaimsAsync());
+
+        Assert.Contains("401", exception.Message);
+    }
+
 }

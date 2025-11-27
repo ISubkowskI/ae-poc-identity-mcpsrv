@@ -17,6 +17,14 @@ namespace Ae.Poc.Identity.Mcp.Data
             Error = null
         };
 
+        /// <summary>
+        /// Creates a failed tool result with validation errors.
+        /// </summary>
+        /// <typeparam name="T">The type of the expected success value.</typeparam>
+        /// <param name="validationWarnings">Collection of validation error messages.</param>
+        /// <param name="status">The status message (default: "Validation Failed").</param>
+        /// <returns>A failed <see cref="ToolResult{T, ErrorOutgoingDto}"/> containing validation errors.</returns>
+        /// <exception cref="ArgumentException">Thrown when validationWarnings is null or empty.</exception>
         public static ToolResult<T, ErrorOutgoingDto> ValidationFailed<T>(IEnumerable<string> validationWarnings, string status = ToolResultStatus.ValidationFailed)
         {
             if (validationWarnings == null || !validationWarnings.Any())

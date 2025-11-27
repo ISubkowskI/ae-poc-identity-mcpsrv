@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
+using Ae.Poc.Identity.Mcp.DataAnnotations;
 
 namespace Ae.Poc.Identity.Mcp.Dtos;
 
@@ -21,6 +22,7 @@ public sealed record AppClaimCreateDto
     [Description("A human-readable display text for the claim. This field is mandatory.")]
     public string DisplayText { get; init; } = string.Empty;
 
+    [PropertiesDictionaryValidation(MaxItems = 50, MaxKeyLength = 100, MaxValueLength = 500)]
     [Description("An optional dictionary of additional properties for the claim (string key-value pairs).")]
     public IDictionary<string, string>? Properties { get; init; }
 

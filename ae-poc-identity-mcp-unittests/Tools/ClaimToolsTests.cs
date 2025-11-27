@@ -128,6 +128,28 @@ public class ClaimToolsTests
     }
 
     [Fact]
+    public async Task GetClaimsAsync_HandlesNullMapperResult_Gracefully()
+    {
+        // Arrange
+        var claims = new List<AppClaim> { new() { Id = Guid.NewGuid(), Type = "test" } };
+        _mockClaimClient.Setup(c => c.LoadClaimsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(claims);
+
+        // Mapper returns null
+        _mockMapper.Setup(m => m.Map<IEnumerable<AppClaimOutgoingDto>>(claims))
+            .Returns((IEnumerable<AppClaimOutgoingDto>)null!);
+
+        // Act
+        var result = await ClaimTools.GetClaimsAsync(
+            _mockClaimClient.Object,
+            _mockMapper.Object);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.NotNull(result.Error);
+    }
+
+    [Fact]
     public async Task GetClaimDetailsAsync_ReturnsClaimDetails_OnSuccess()
     {
         // Arrange
@@ -165,6 +187,29 @@ public class ClaimToolsTests
         Assert.NotNull(result.Error);
         Assert.Contains("Validation Failed", result.Error.Status);
         Assert.Contains("must be a valid GUID", result.Error.Errors?.First());
+    }
+
+    [Theory]
+    [InlineData("", "cannot be empty")]
+    [InlineData("   ", "cannot be empty")]
+    [InlineData("not-a-guid", "must be a valid GUID")]
+    [InlineData("12345", "must be a valid GUID")]
+    [InlineData("00000000-0000-0000-0000-000000000000", "cannot be an empty GUID")]
+    public async Task GetClaimDetailsAsync_ReturnsValidationFailed_ForInvalidClaimIds(
+    string invalidId,
+    string expectedErrorFragment)
+    {
+        // Act
+        var result = await ClaimTools.GetClaimDetailsAsync(
+            invalidId,
+            _mockClaimClient.Object,
+            _mockMapper.Object);
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.Null(result.Value);
+        Assert.NotNull(result.Error);
+        Assert.Contains("Validation Failed", result.Error.Status);
+        Assert.Contains(expectedErrorFragment, result.Error.Errors?.First());
     }
 
     [Fact]

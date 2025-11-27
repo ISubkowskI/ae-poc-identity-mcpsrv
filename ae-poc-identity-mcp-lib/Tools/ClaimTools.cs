@@ -1,9 +1,10 @@
-﻿using AutoMapper;
-using ModelContextProtocol.Server;
-using System.ComponentModel;
+﻿using Ae.Poc.Identity.Mcp.Data;
 using Ae.Poc.Identity.Mcp.Dtos;
 using Ae.Poc.Identity.Mcp.Services;
-using Ae.Poc.Identity.Mcp.Data;
+using AutoMapper;
+using Microsoft.Extensions.Logging;
+using ModelContextProtocol.Server;
+using System.ComponentModel;
 
 namespace Ae.Poc.Identity.Mcp.Tools;
 
@@ -23,21 +24,32 @@ public static class ClaimTools
     public static async Task<ToolResult<IEnumerable<AppClaimOutgoingDto>, ErrorOutgoingDto>> GetClaimsAsync(
         IClaimClient claimClient,
         IMapper mapper,
+        //ILogger<ClaimTools>? logger = null,
         CancellationToken ct = default)
     {
         try
         {
+            //logger?.LogInformation("Retrieving all claims");
             var claims = (await claimClient.LoadClaimsAsync(ct).ConfigureAwait(false));
             if (claims == null)
             {
-                return ToolResultFactory.Failure<IEnumerable<AppClaimOutgoingDto>>(["No claims found"], "Warning");
+                //logger?.LogWarning("No claims found in the system");
+                return ToolResultFactory.Warning<IEnumerable<AppClaimOutgoingDto>>("No claims found");
             }
 
             var res = mapper.Map<IEnumerable<AppClaimOutgoingDto>>(claims);
+            if (res == null)
+            {
+                //logger?.LogError(ex, "Failed to map claims to outgoing DTOs");
+                return ToolResultFactory.Failure<IEnumerable<AppClaimOutgoingDto>>(["Failed to map claims to outgoing DTOs"]);
+            }
+
+            //logger?.LogInformation("Successfully retrieved {ClaimCount} claims", res.Count());
             return ToolResultFactory.Success(res);
         }
         catch (Exception ex)
         {
+            //logger?.LogError(ex, "Error occurred while retrieving claims");
             return ToolResultFactory.FromException<IEnumerable<AppClaimOutgoingDto>>(ex);
         }
     }

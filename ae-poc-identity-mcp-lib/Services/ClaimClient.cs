@@ -86,7 +86,8 @@ public sealed class ClaimClient : IClaimClient
 
         try
         {
-            var dtoList = await _httpClient.GetFromJsonAsync<IEnumerable<AppClaimDto>>(requestUri: requestUri, cancellationToken: ct).ConfigureAwait(false);
+            //var dtoList = await _httpClient.GetFromJsonAsync<IEnumerable<AppClaimDto>>(requestUri: requestUri, cancellationToken: ct).ConfigureAwait(false);
+            var dtoList = await _httpClient.GetFromJsonAsync<IEnumerable<AppClaimDto>>(requestUri: requestUri, cancellationToken: ct);
             return _mapper.Map<IEnumerable<AppClaim>?>(dtoList);
         }
         catch (HttpRequestException httpEx)
