@@ -33,9 +33,10 @@ Expected JSON structure:
         IClaimClient claimClient,
         IMapper mapper,
         IDtoValidator validator,
-        //ILogger<ClaimTools>? logger = null,
+        ILoggerFactory loggerFactory,
         CancellationToken ct = default)
     {
+        var logger = loggerFactory.CreateLogger("Ae.Poc.Identity.Mcp.Tools.ClaimTools");
         try
         {
             if (!validator.TryValidate(queryIncomingDto, out var validationResults))
@@ -47,37 +48,37 @@ Expected JSON structure:
             var claimsQuery = mapper.Map<ClaimsQuery>(queryIncomingDto);
             if (claimsQuery == null)
             {
-                //logger?.LogError(ex, "Failed to map query incoming Dto to claims query");
+                logger.LogError("Failed to map query incoming Dto to claims query");
                 return ToolResultFactory.Failure<ClaimsOutgoingDto>(["Failed to map query incoming Dto to claims query"]);
             }
 
-            //logger?.LogInformation("Retrieving all claims");
+            logger.LogInformation("Retrieving all claims");
             var claims = await claimClient.LoadClaimsAsync(claimsQuery, ct);
             if (claims == null)
             {
-                //logger?.LogWarning("No claims found in the system");
+                logger.LogWarning("No claims found in the system");
                 return ToolResultFactory.Warning<ClaimsOutgoingDto>("No claims found");
             }
 
             var res = mapper.Map<IEnumerable<ClaimOutgoingDto>>(claims);
             if (res == null)
             {
-                //logger?.LogError(ex, "Failed to map claims to outgoing DTOs");
+                logger.LogError("Failed to map claims to outgoing DTOs");
                 return ToolResultFactory.Failure<ClaimsOutgoingDto>(["Failed to map claims to outgoing DTOs"]);
             }
 
             ClaimsOutgoingDto resDto = new ()
             {
                 Claims = res,
-                ClaimsInfo = queryIncomingDto.WithClaimsInfo ? mapper.Map<ClaimsInfoOutgoingDto>(await claimClient.GetClaimsInfoAsync(ct)) : null
+                ClaimsInfo = (queryIncomingDto.WithClaimsInfo ?? false) ? mapper.Map<ClaimsInfoOutgoingDto>(await claimClient.GetClaimsInfoAsync(ct)) : null
             };
 
-            //logger?.LogInformation("Successfully retrieved {ClaimCount} claims", res.Count());
+            logger.LogInformation("Successfully retrieved {ClaimCount} claims", res.Count());
             return ToolResultFactory.Success(resDto);
         }
         catch (Exception ex)
         {
-            //logger?.LogError(ex, "Error occurred while retrieving claims");
+            logger.LogError(ex, "Error occurred while retrieving claims");
             return ToolResultFactory.FromException<ClaimsOutgoingDto>(ex);
         }
     }
@@ -91,8 +92,10 @@ Expected JSON structure:
         [Description("The id of the claim to get details for")] string claimId,
         IClaimClient claimClient,
         IMapper mapper,
+        ILoggerFactory loggerFactory,
         CancellationToken ct = default)
     {
+        var logger = loggerFactory.CreateLogger("Ae.Poc.Identity.Mcp.Tools.ClaimTools");
         try
         {
             if (!TryParseClaimId(claimId, out _, out var errorMessage))
@@ -124,8 +127,10 @@ Expected JSON structure:
         [Description("The id of the claim to delete")] string claimId,
         IClaimClient claimClient,
         IMapper mapper,
+        ILoggerFactory loggerFactory,
         CancellationToken ct = default)
     {
+        var logger = loggerFactory.CreateLogger("Ae.Poc.Identity.Mcp.Tools.ClaimTools");
         try
         {
             if (!TryParseClaimId(claimId, out _, out var errorMessage))
@@ -162,8 +167,10 @@ Expected JSON structure:
         IClaimClient claimClient,
         IMapper mapper,
         IDtoValidator validator,
+        ILoggerFactory loggerFactory,
         CancellationToken ct = default)
     {
+        var logger = loggerFactory.CreateLogger("Ae.Poc.Identity.Mcp.Tools.ClaimTools");
         try
         {
             if (!validator.TryValidate(claimDto, out var validationResults))
@@ -204,8 +211,10 @@ Expected JSON structure:
         IClaimClient claimClient,
         IMapper mapper,
         IDtoValidator validator,
+        ILoggerFactory loggerFactory,
         CancellationToken ct = default)
     {
+        var logger = loggerFactory.CreateLogger("Ae.Poc.Identity.Mcp.Tools.ClaimTools");
         try
         {
             if (!TryParseClaimId(claimId, out var parsedClaimId, out var errorMessage))

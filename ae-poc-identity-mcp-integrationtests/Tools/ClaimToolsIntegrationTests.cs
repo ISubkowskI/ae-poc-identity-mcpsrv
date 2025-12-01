@@ -4,6 +4,7 @@ using Ae.Poc.Identity.Mcp.Services;
 using Ae.Poc.Identity.Mcp.Tools;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace Ae.Poc.Identity.Mcp.IntegrationTests.Tools;
@@ -16,6 +17,7 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
 {
     private readonly CustomWebApplicationFactory _factory;
     private readonly IServiceScope _scope;
+    private readonly ILoggerFactory _loggerFactory = null!;
     private readonly IClaimClient _claimClient;
     private readonly IMapper _mapper;
     private readonly IDtoValidator _validator;
@@ -28,12 +30,18 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
         // Create a scope to get services
         _scope = _factory.Services.CreateScope();
         _claimClient = _scope.ServiceProvider.GetRequiredService<IClaimClient>();
+       
         _mapper = _scope.ServiceProvider.GetRequiredService<IMapper>();
         _validator = _scope.ServiceProvider.GetRequiredService<IDtoValidator>();
+
+        Mock<ILoggerFactory> mockLoggerFactory = new();
+        mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>()))
+            .Returns((new Mock<ILogger>()).Object);
+        _loggerFactory = mockLoggerFactory.Object;
     }
 
     [Fact]
-    public async Task GetClaimsAsync_ReturnsAllClaims_Integration()
+    public async Task GetClaimsAsync_ReturnsNumberOfClaims_Integration()
     {
         // Arrange
         ClaimsQueryIncomingDto dto = new ()
@@ -43,7 +51,7 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
         };
 
         // Act
-        var result = await ClaimTools.GetClaimsAsync(dto, _claimClient, _mapper, _validator);
+        var result = await ClaimTools.GetClaimsAsync(dto, _claimClient, _mapper, _validator, _loggerFactory);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -60,7 +68,7 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
         var claimId = "00000000-0000-0000-0000-000000000001";
 
         // Act
-        var result = await ClaimTools.GetClaimDetailsAsync(claimId, _claimClient, _mapper);
+        var result = await ClaimTools.GetClaimDetailsAsync(claimId, _claimClient, _mapper, _loggerFactory);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -76,7 +84,7 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
         var nonExistentId = Guid.NewGuid().ToString();
 
         // Act
-        var result = await ClaimTools.GetClaimDetailsAsync(nonExistentId, _claimClient, _mapper);
+        var result = await ClaimTools.GetClaimDetailsAsync(nonExistentId, _claimClient, _mapper, _loggerFactory);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -99,7 +107,7 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
         };
 
         // Act
-        var result = await ClaimTools.CreateClaimAsync(createDto, _claimClient, _mapper, _validator);
+        var result = await ClaimTools.CreateClaimAsync(createDto, _claimClient, _mapper, _validator, _loggerFactory);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -123,7 +131,7 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
         };
 
         // Act
-        var result = await ClaimTools.CreateClaimAsync(invalidDto, _claimClient, _mapper, _validator);
+        var result = await ClaimTools.CreateClaimAsync(invalidDto, _claimClient, _mapper, _validator, _loggerFactory);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -147,7 +155,7 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
         };
 
         // Act
-        var result = await ClaimTools.UpdateClaimAsync(claimId.ToString(), updateDto, _claimClient, _mapper, _validator);
+        var result = await ClaimTools.UpdateClaimAsync(claimId.ToString(), updateDto, _claimClient, _mapper, _validator, _loggerFactory);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -172,7 +180,7 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
         };
 
         // Act
-        var result = await ClaimTools.UpdateClaimAsync(pathId.ToString(), updateDto, _claimClient, _mapper, _validator);
+        var result = await ClaimTools.UpdateClaimAsync(pathId.ToString(), updateDto, _claimClient, _mapper, _validator, _loggerFactory);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -188,7 +196,7 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
         var claimId = "00000000-0000-0000-0000-000000000002";
 
         // Act
-        var result = await ClaimTools.DeleteClaimAsync(claimId, _claimClient, _mapper);
+        var result = await ClaimTools.DeleteClaimAsync(claimId, _claimClient, _mapper, _loggerFactory);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -203,7 +211,7 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
         var invalidId = "not-a-guid";
 
         // Act
-        var result = await ClaimTools.DeleteClaimAsync(invalidId, _claimClient, _mapper);
+        var result = await ClaimTools.DeleteClaimAsync(invalidId, _claimClient, _mapper, _loggerFactory);
 
         // Assert
         Assert.False(result.IsSuccess);

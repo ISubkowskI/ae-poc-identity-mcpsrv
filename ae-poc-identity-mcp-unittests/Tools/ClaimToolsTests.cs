@@ -4,6 +4,7 @@ using Ae.Poc.Identity.Mcp.Services;
 using Ae.Poc.Identity.Mcp.Tools;
 using AutoMapper;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System.ComponentModel.DataAnnotations;
 
@@ -14,12 +15,18 @@ public class ClaimToolsTests
     private readonly Mock<IClaimClient> _mockClaimClient;
     private readonly Mock<IMapper> _mockMapper;
     private readonly Mock<IDtoValidator> _mockValidator;
+    private readonly Mock<ILogger> _mockLogger;
+    private readonly Mock<ILoggerFactory> _mockLoggerFactory;
     
     public ClaimToolsTests()
     {
         _mockClaimClient = new Mock<IClaimClient>();
         _mockMapper = new Mock<IMapper>();
         _mockValidator = new Mock<IDtoValidator>();
+        _mockLogger = new Mock<ILogger>();
+        _mockLoggerFactory = new Mock<ILoggerFactory>();
+        _mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>()))
+            .Returns(_mockLogger.Object);
     }
 
     [Fact]
@@ -29,12 +36,13 @@ public class ClaimToolsTests
         ClaimsQuery claimsQuery = new()
         {
             Skipped = 0,
-            NumberOf = 10
+            NumberOf = 10,
         };
         ClaimsQueryIncomingDto dto = new()
         {
             Skipped = 0,
-            NumberOf = 10
+            NumberOf = 10,
+            WithClaimsInfo = true
         };
         var claims = new List<AppClaim> { new() { Id = Guid.NewGuid(), Type = "test" } };
         var dtos = new List<ClaimOutgoingDto> { new() { Id = claims[0].Id, Type = "test" } };
@@ -45,7 +53,7 @@ public class ClaimToolsTests
             .Returns(dtos);
 
         // Act
-        var result = await ClaimTools.GetClaimsAsync(dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object);
+        var result = await ClaimTools.GetClaimsAsync(dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -72,14 +80,15 @@ public class ClaimToolsTests
             .ThrowsAsync(new Exception("Test exception"));
 
         // Act
-        var result = await ClaimTools.GetClaimsAsync(dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object);
+        var result = await ClaimTools.GetClaimsAsync(dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Value.Should().BeNull();
         result.Error.Should().NotBeNull();
         result.Error.Status.Should().Contain("Error");
-        Assert.Contains("Test exception", result.Error.Errors?.First());
+        result.Error.Status.Should().Contain("Error");
+        result.Error.Errors.Should().Contain(e => e.Contains("Test exception"));
     }
 
     [Fact]
@@ -93,7 +102,7 @@ public class ClaimToolsTests
             .Returns(false);
 
         // Act
-        var result = await ClaimTools.CreateClaimAsync(dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object);
+        var result = await ClaimTools.CreateClaimAsync(dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -121,7 +130,7 @@ public class ClaimToolsTests
         _mockMapper.Setup(m => m.Map<ClaimOutgoingDto>(createdClaim)).Returns(outgoingDto);
 
         // Act
-        var result = await ClaimTools.CreateClaimAsync(dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object);
+        var result = await ClaimTools.CreateClaimAsync(dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -148,7 +157,7 @@ public class ClaimToolsTests
             .ReturnsAsync((IEnumerable<AppClaim>)null!);
 
         // Act
-        var result = await ClaimTools.GetClaimsAsync(dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object);
+        var result = await ClaimTools.GetClaimsAsync(dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -185,7 +194,8 @@ public class ClaimToolsTests
             dto,
             _mockClaimClient.Object,
             _mockMapper.Object,
-            _mockValidator.Object);
+            _mockValidator.Object,
+            _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -208,7 +218,7 @@ public class ClaimToolsTests
             .Returns(dto);
 
         // Act
-        var result = await ClaimTools.GetClaimDetailsAsync(id.ToString(), _mockClaimClient.Object, _mockMapper.Object);
+        var result = await ClaimTools.GetClaimDetailsAsync(id.ToString(), _mockClaimClient.Object, _mockMapper.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -224,7 +234,7 @@ public class ClaimToolsTests
         var invalidId = "not-a-guid";
 
         // Act
-        var result = await ClaimTools.GetClaimDetailsAsync(invalidId, _mockClaimClient.Object, _mockMapper.Object);
+        var result = await ClaimTools.GetClaimDetailsAsync(invalidId, _mockClaimClient.Object, _mockMapper.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -248,7 +258,8 @@ public class ClaimToolsTests
         var result = await ClaimTools.GetClaimDetailsAsync(
             invalidId,
             _mockClaimClient.Object,
-            _mockMapper.Object);
+            _mockMapper.Object,
+            _mockLoggerFactory.Object);
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Value.Should().BeNull();
@@ -264,7 +275,7 @@ public class ClaimToolsTests
         var emptyId = "";
 
         // Act
-        var result = await ClaimTools.GetClaimDetailsAsync(emptyId, _mockClaimClient.Object, _mockMapper.Object);
+        var result = await ClaimTools.GetClaimDetailsAsync(emptyId, _mockClaimClient.Object, _mockMapper.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -284,7 +295,7 @@ public class ClaimToolsTests
             .ReturnsAsync((AppClaim)null!);
 
         // Act
-        var result = await ClaimTools.GetClaimDetailsAsync(id.ToString(), _mockClaimClient.Object, _mockMapper.Object);
+        var result = await ClaimTools.GetClaimDetailsAsync(id.ToString(), _mockClaimClient.Object, _mockMapper.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -303,14 +314,15 @@ public class ClaimToolsTests
             .ThrowsAsync(new Exception("Database error"));
 
         // Act
-        var result = await ClaimTools.GetClaimDetailsAsync(id.ToString(), _mockClaimClient.Object, _mockMapper.Object);
+        var result = await ClaimTools.GetClaimDetailsAsync(id.ToString(), _mockClaimClient.Object, _mockMapper.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Value.Should().BeNull();
         result.Error.Should().NotBeNull();
         result.Error.Status.Should().Contain("Error");
-        Assert.Contains("Database error", result.Error.Errors?.First());
+        result.Error.Status.Should().Contain("Error");
+        result.Error.Errors.Should().Contain(e => e.Contains("Database error"));
     }
 
     [Fact]
@@ -327,7 +339,7 @@ public class ClaimToolsTests
             .Returns(dto);
 
         // Act
-        var result = await ClaimTools.DeleteClaimAsync(id.ToString(), _mockClaimClient.Object, _mockMapper.Object);
+        var result = await ClaimTools.DeleteClaimAsync(id.ToString(), _mockClaimClient.Object, _mockMapper.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -343,7 +355,7 @@ public class ClaimToolsTests
         var invalidId = "invalid-guid";
 
         // Act
-        var result = await ClaimTools.DeleteClaimAsync(invalidId, _mockClaimClient.Object, _mockMapper.Object);
+        var result = await ClaimTools.DeleteClaimAsync(invalidId, _mockClaimClient.Object, _mockMapper.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -360,7 +372,7 @@ public class ClaimToolsTests
         var emptyId = "";
 
         // Act
-        var result = await ClaimTools.DeleteClaimAsync(emptyId, _mockClaimClient.Object, _mockMapper.Object);
+        var result = await ClaimTools.DeleteClaimAsync(emptyId, _mockClaimClient.Object, _mockMapper.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -379,14 +391,15 @@ public class ClaimToolsTests
             .ThrowsAsync(new Exception("Delete failed"));
 
         // Act
-        var result = await ClaimTools.DeleteClaimAsync(id.ToString(), _mockClaimClient.Object, _mockMapper.Object);
+        var result = await ClaimTools.DeleteClaimAsync(id.ToString(), _mockClaimClient.Object, _mockMapper.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Value.Should().BeNull();
         result.Error.Should().NotBeNull();
         result.Error.Status.Should().Contain("Error");
-        Assert.Contains("Delete failed", result.Error.Errors?.First());
+        result.Error.Status.Should().Contain("Error");
+        result.Error.Errors.Should().Contain(e => e.Contains("Delete failed"));
     }
 
     [Fact]
@@ -408,7 +421,7 @@ public class ClaimToolsTests
         _mockMapper.Setup(m => m.Map<ClaimOutgoingDto>(updatedClaim)).Returns(outgoingDto);
 
         // Act
-        var result = await ClaimTools.UpdateClaimAsync(id.ToString(), dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object);
+        var result = await ClaimTools.UpdateClaimAsync(id.ToString(), dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -429,7 +442,7 @@ public class ClaimToolsTests
             .Returns(false);
 
         // Act
-        var result = await ClaimTools.UpdateClaimAsync(id.ToString(), dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object);
+        var result = await ClaimTools.UpdateClaimAsync(id.ToString(), dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -447,7 +460,7 @@ public class ClaimToolsTests
         var dto = new ClaimUpdateDto { Id = Guid.NewGuid() };
 
         // Act
-        var result = await ClaimTools.UpdateClaimAsync(invalidId, dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object);
+        var result = await ClaimTools.UpdateClaimAsync(invalidId, dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -466,7 +479,7 @@ public class ClaimToolsTests
         var dto = new ClaimUpdateDto { Id = bodyId, Type = "test", Value = "test", ValueType = "string", DisplayText = "Test" };
 
         // Act
-        var result = await ClaimTools.UpdateClaimAsync(pathId.ToString(), dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object);
+        var result = await ClaimTools.UpdateClaimAsync(pathId.ToString(), dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -492,13 +505,14 @@ public class ClaimToolsTests
             .ThrowsAsync(new Exception("Update failed"));
 
         // Act
-        var result = await ClaimTools.UpdateClaimAsync(id.ToString(), dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object);
+        var result = await ClaimTools.UpdateClaimAsync(id.ToString(), dto, _mockClaimClient.Object, _mockMapper.Object, _mockValidator.Object, _mockLoggerFactory.Object);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Value.Should().BeNull();
         result.Error.Should().NotBeNull();
         result.Error.Status.Should().Contain("Error");
-        Assert.Contains("Update failed", result.Error.Errors?.First());
+        result.Error.Status.Should().Contain("Error");
+        result.Error.Errors.Should().Contain(e => e.Contains("Update failed"));
     }
 }

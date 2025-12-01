@@ -59,7 +59,7 @@ public class ClaimToolsBenchmark
             Skipped = 0,
             NumberOf = 10
         };
-        var result = await ClaimTools.GetClaimsAsync(dto, _claimClient, _mapper, _validator, CancellationToken.None);
+        var result = await ClaimTools.GetClaimsAsync(dto, _claimClient, _mapper, _validator, _loggerFactory, CancellationToken.None);
         if (result == null) throw new InvalidOperationException("Result is null");
     }
 

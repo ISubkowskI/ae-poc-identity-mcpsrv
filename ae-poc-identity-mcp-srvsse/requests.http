@@ -2,7 +2,7 @@
 // IMPORTANT: Replace the placeholder below with the actual value of
 // "ExpectedToken" from your appsettings.json file.
 @token = YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME
-@mcpSessionId = K2PEu780HS1E1nDbfuNHNQ
+@mcpSessionId = JXxJj4CIwx9U_Ar22nreGA
 ## 2025-03-26
 @mcpProtocolVersion = 2025-06-18
 
