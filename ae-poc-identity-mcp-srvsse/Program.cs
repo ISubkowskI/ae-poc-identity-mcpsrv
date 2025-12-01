@@ -7,10 +7,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using System.Reflection;
-using Polly;
-using Polly.Extensions.Http;
 
 var logConfig = new LoggerConfiguration()
     .MinimumLevel.Verbose()
@@ -40,7 +39,16 @@ try
     });
 
     builder.Services.AddScoped<IDtoValidator, DtoValidator>();
-    builder.Services.AddHttpClient<IClaimClient, ClaimClient>();
+    builder.Services.AddHttpClient<IClaimClient, ClaimClient>()
+        .ConfigureHttpClient(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(30);
+        })
+        .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+        {
+            PooledConnectionLifetime = TimeSpan.FromMinutes(15),
+            MaxConnectionsPerServer = 25
+        });
 
     var appOptions = builder.Configuration.GetSection(AppOptions.App).Get<AppOptions>() ?? new AppOptions();
     Log.Information("{AppName} ver:{AppVersion}", appOptions.Name, appOptions.Version);
@@ -54,6 +62,10 @@ try
             options.TimeProvider = TimeProvider.System;
         });
     builder.Services.AddAuthorization();
+
+    //builder.Services.AddHealthChecks()
+    //    .AddCheck<ClaimClientHealthCheck>("claim-api")
+    //    .AddCheck("self", () => HealthCheckResult.Healthy());
 
     // MCP Server Setup
     builder.Services
@@ -69,6 +81,7 @@ try
     var webapp = builder.Build();
     webapp.UseAuthentication();
     webapp.UseAuthorization();
+    //webapp.MapHealthChecks("/health");
     webapp.MapMcp(appOptions.MapMcpPattern)
         .RequireAuthorization(); // Protect the MCP endpoint
 

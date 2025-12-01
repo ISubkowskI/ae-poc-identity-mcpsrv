@@ -49,7 +49,12 @@ public class ClaimClientTests
     public async Task LoadClaimsAsync_ReturnsClaims_OnSuccess()
     {
         // Arrange
-        var dtos = new List<AppClaimDto> { new() { Id = Guid.NewGuid(), Type = "test" } };
+        ClaimsQuery claimsQuery = new ()
+        {
+            Skipped = 0,
+            NumberOf = 10
+        };
+        var dtos = new List<ClaimDto> { new() { Id = Guid.NewGuid(), Type = "test" } };
         var claims = new List<AppClaim> { new() { Id = dtos[0].Id, Type = "test" } };
 
         _mockHttpMessageHandler.Protected()
@@ -64,11 +69,11 @@ public class ClaimClientTests
                 Content = JsonContent.Create(dtos)
             });
 
-        _mockMapper.Setup(m => m.Map<IEnumerable<AppClaim>>(It.IsAny<IEnumerable<AppClaimDto>>()))
+        _mockMapper.Setup(m => m.Map<IEnumerable<AppClaim>>(It.IsAny<IEnumerable<ClaimDto>>()))
             .Returns(claims);
 
         // Act
-        var result = await _claimClient.LoadClaimsAsync();
+        var result = await _claimClient.LoadClaimsAsync(claimsQuery);
 
         // Assert
         Assert.NotNull(result);
@@ -80,6 +85,11 @@ public class ClaimClientTests
     public async Task LoadClaimsAsync_ReturnsNull_OnNullResponse()
     {
         // Arrange
+        ClaimsQuery claimsQuery = new()
+        {
+            Skipped = 0,
+            NumberOf = 10
+        };
         _mockHttpMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
@@ -89,14 +99,14 @@ public class ClaimClientTests
             .ReturnsAsync(new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
-                Content = JsonContent.Create<IEnumerable<AppClaimDto>>(null)
+                Content = JsonContent.Create<IEnumerable<ClaimDto>>(null)
             });
 
-        _mockMapper.Setup(m => m.Map<IEnumerable<AppClaim>>(It.IsAny<IEnumerable<AppClaimDto>>()))
+        _mockMapper.Setup(m => m.Map<IEnumerable<AppClaim>>(It.IsAny<IEnumerable<ClaimDto>>()))
             .Returns((IEnumerable<AppClaim>)null);
 
         // Act
-        var result = await _claimClient.LoadClaimsAsync();
+        var result = await _claimClient.LoadClaimsAsync(claimsQuery);
 
         // Assert
         Assert.Null(result);
@@ -107,7 +117,7 @@ public class ClaimClientTests
     {
         // Arrange
         var id = Guid.NewGuid();
-        var dto = new AppClaimDto { Id = id, Type = "test" };
+        var dto = new ClaimDto { Id = id, Type = "test" };
         var claim = new AppClaim { Id = id, Type = "test" };
 
         _mockHttpMessageHandler.Protected()
@@ -122,7 +132,7 @@ public class ClaimClientTests
                 Content = JsonContent.Create(dto)
             });
 
-        _mockMapper.Setup(m => m.Map<AppClaim>(It.IsAny<AppClaimDto>()))
+        _mockMapper.Setup(m => m.Map<AppClaim>(It.IsAny<ClaimDto>()))
             .Returns(claim);
 
         // Act
@@ -138,12 +148,12 @@ public class ClaimClientTests
     {
         // Arrange
         var claim = new AppClaim { Type = "test" };
-        var dto = new AppClaimDto { Type = "test" };
-        var createdDto = new AppClaimDto { Id = Guid.NewGuid(), Type = "test" };
+        var dto = new ClaimDto { Type = "test" };
+        var createdDto = new ClaimDto { Id = Guid.NewGuid(), Type = "test" };
         var createdClaim = new AppClaim { Id = createdDto.Id, Type = "test" };
 
-        _mockMapper.Setup(m => m.Map<AppClaimDto>(claim)).Returns(dto);
-        _mockMapper.Setup(m => m.Map<AppClaim>(It.IsAny<AppClaimDto>())).Returns(createdClaim);
+        _mockMapper.Setup(m => m.Map<ClaimDto>(claim)).Returns(dto);
+        _mockMapper.Setup(m => m.Map<AppClaim>(It.IsAny<ClaimDto>())).Returns(createdClaim);
 
         _mockHttpMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
@@ -171,12 +181,12 @@ public class ClaimClientTests
         // Arrange
         var id = Guid.NewGuid();
         var claim = new AppClaim { Id = id, Type = "updated" };
-        var dto = new AppClaimDto { Id = id, Type = "updated" };
-        var updatedDto = new AppClaimDto { Id = id, Type = "updated" };
+        var dto = new ClaimDto { Id = id, Type = "updated" };
+        var updatedDto = new ClaimDto { Id = id, Type = "updated" };
         var updatedClaim = new AppClaim { Id = id, Type = "updated" };
 
-        _mockMapper.Setup(m => m.Map<AppClaimDto>(claim)).Returns(dto);
-        _mockMapper.Setup(m => m.Map<AppClaim>(It.IsAny<AppClaimDto>())).Returns(updatedClaim);
+        _mockMapper.Setup(m => m.Map<ClaimDto>(claim)).Returns(dto);
+        _mockMapper.Setup(m => m.Map<AppClaim>(It.IsAny<ClaimDto>())).Returns(updatedClaim);
 
         _mockHttpMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
@@ -203,10 +213,10 @@ public class ClaimClientTests
     {
         // Arrange
         var id = Guid.NewGuid();
-        var deletedDto = new AppClaimDto { Id = id, Type = "deleted" };
+        var deletedDto = new ClaimDto { Id = id, Type = "deleted" };
         var deletedClaim = new AppClaim { Id = id, Type = "deleted" };
 
-        _mockMapper.Setup(m => m.Map<AppClaim>(It.IsAny<AppClaimDto>())).Returns(deletedClaim);
+        _mockMapper.Setup(m => m.Map<AppClaim>(It.IsAny<ClaimDto>())).Returns(deletedClaim);
 
         _mockHttpMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
@@ -232,6 +242,11 @@ public class ClaimClientTests
     public async Task LoadClaimsAsync_ThrowsHttpRequestException_OnHttpError()
     {
         // Arrange
+        ClaimsQuery claimsQuery = new()
+        {
+            Skipped = 0,
+            NumberOf = 10
+        };
         _mockHttpMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
@@ -245,7 +260,7 @@ public class ClaimClientTests
             });
 
         // Act & Assert
-        await Assert.ThrowsAsync<HttpRequestException>(async () => await _claimClient.LoadClaimsAsync());
+        await Assert.ThrowsAsync<HttpRequestException>(async () => await _claimClient.LoadClaimsAsync(claimsQuery));
     }
 
     [Fact]
@@ -263,7 +278,7 @@ public class ClaimClientTests
             .ReturnsAsync(new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
-                Content = JsonContent.Create<AppClaimDto>(null)
+                Content = JsonContent.Create<ClaimDto>(null)
             });
 
         // Act 
@@ -278,9 +293,9 @@ public class ClaimClientTests
     {
         // Arrange
         var claim = new AppClaim { Type = "test" };
-        var dto = new AppClaimDto { Type = "test" };
+        var dto = new ClaimDto { Type = "test" };
 
-        _mockMapper.Setup(m => m.Map<AppClaimDto>(claim)).Returns(dto);
+        _mockMapper.Setup(m => m.Map<ClaimDto>(claim)).Returns(dto);
 
         _mockHttpMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
@@ -302,6 +317,11 @@ public class ClaimClientTests
     public async Task LoadClaimsAsync_ThrowsTaskCanceledException_WhenCancelled()
     {
         // Arrange
+        ClaimsQuery claimsQuery = new()
+        {
+            Skipped = 0,
+            NumberOf = 10
+        };
         var cts = new CancellationTokenSource();
 
         _mockHttpMessageHandler.Protected()
@@ -321,13 +341,18 @@ public class ClaimClientTests
 
         // Act & Assert
         var exception = await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            async () => await _claimClient.LoadClaimsAsync(cts.Token));
+            async () => await _claimClient.LoadClaimsAsync(claimsQuery, cts.Token));
     }
 
     [Fact]
     public async Task LoadClaimsAsync_ThrowsHttpRequestException_On401Unauthorized()
     {
         // Arrange
+        ClaimsQuery claimsQuery = new()
+        {
+            Skipped = 0,
+            NumberOf = 10
+        };
         _mockHttpMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
                 "SendAsync",
@@ -342,7 +367,7 @@ public class ClaimClientTests
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<HttpRequestException>(
-            async () => await _claimClient.LoadClaimsAsync());
+            async () => await _claimClient.LoadClaimsAsync(claimsQuery));
 
         Assert.Contains("401", exception.Message);
     }

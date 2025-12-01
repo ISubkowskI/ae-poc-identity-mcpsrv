@@ -10,7 +10,7 @@ public class ToolResultFactoryTests
     public void Success_ReturnsSuccessResult_WithValue()
     {
         // Arrange
-        var value = new AppClaimOutgoingDto { Id = Guid.NewGuid(), Type = "test" };
+        var value = new ClaimOutgoingDto { Id = Guid.NewGuid(), Type = "test" };
 
         // Act
         var result = ToolResultFactory.Success(value);
@@ -29,7 +29,7 @@ public class ToolResultFactoryTests
         var errors = new[] { "Error 1", "Error 2" };
 
         // Act
-        var result = ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>(errors);
+        var result = ToolResultFactory.ValidationFailed<ClaimOutgoingDto>(errors);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -49,7 +49,7 @@ public class ToolResultFactoryTests
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => 
-            ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>(errors));
+            ToolResultFactory.ValidationFailed<ClaimOutgoingDto>(errors));
         Assert.Contains("must contain at least one message", exception.Message);
     }
 
@@ -58,7 +58,7 @@ public class ToolResultFactoryTests
     {
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => 
-            ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>(null!));
+            ToolResultFactory.ValidationFailed<ClaimOutgoingDto>(null!));
         Assert.Contains("must contain at least one message", exception.Message);
     }
 
@@ -69,7 +69,7 @@ public class ToolResultFactoryTests
         var errors = new string?[] { "Valid error", null, "Another error" };
 
         // Act
-        var result = ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>(errors!);
+        var result = ToolResultFactory.ValidationFailed<ClaimOutgoingDto>(errors!);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -86,7 +86,7 @@ public class ToolResultFactoryTests
         var message = "This is a warning";
 
         // Act
-        var result = ToolResultFactory.Warning<AppClaimOutgoingDto>(message);
+        var result = ToolResultFactory.Warning<ClaimOutgoingDto>(message);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -101,7 +101,7 @@ public class ToolResultFactoryTests
     public void Warning_HandlesNullMessage()
     {
         // Act
-        var result = ToolResultFactory.Warning<AppClaimOutgoingDto>(null!);
+        var result = ToolResultFactory.Warning<ClaimOutgoingDto>(null!);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -116,7 +116,7 @@ public class ToolResultFactoryTests
         var errors = new[] { "Critical error", "Another error" };
 
         // Act
-        var result = ToolResultFactory.Failure<AppClaimOutgoingDto>(errors);
+        var result = ToolResultFactory.Failure<ClaimOutgoingDto>(errors);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -135,7 +135,7 @@ public class ToolResultFactoryTests
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => 
-            ToolResultFactory.Failure<AppClaimOutgoingDto>(errors));
+            ToolResultFactory.Failure<ClaimOutgoingDto>(errors));
         Assert.Contains("must contain at least one error message", exception.Message);
     }
 
@@ -144,7 +144,7 @@ public class ToolResultFactoryTests
     {
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => 
-            ToolResultFactory.Failure<AppClaimOutgoingDto>(null!));
+            ToolResultFactory.Failure<ClaimOutgoingDto>(null!));
         Assert.Contains("must contain at least one error message", exception.Message);
     }
 
@@ -155,7 +155,7 @@ public class ToolResultFactoryTests
         var errors = new string?[] { null, "Valid error" };
 
         // Act
-        var result = ToolResultFactory.Failure<AppClaimOutgoingDto>(errors!);
+        var result = ToolResultFactory.Failure<ClaimOutgoingDto>(errors!);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -171,7 +171,7 @@ public class ToolResultFactoryTests
         var exception = new InvalidOperationException("Something went wrong");
 
         // Act
-        var result = ToolResultFactory.FromException<AppClaimOutgoingDto>(exception);
+        var result = ToolResultFactory.FromException<ClaimOutgoingDto>(exception);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -186,7 +186,7 @@ public class ToolResultFactoryTests
     public void FromException_HandlesNullException()
     {
         // Act
-        var result = ToolResultFactory.FromException<AppClaimOutgoingDto>(null!);
+        var result = ToolResultFactory.FromException<ClaimOutgoingDto>(null!);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -202,7 +202,7 @@ public class ToolResultFactoryTests
         var customStatus = "Custom Validation Status";
 
         // Act
-        var result = ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>(errors, customStatus);
+        var result = ToolResultFactory.ValidationFailed<ClaimOutgoingDto>(errors, customStatus);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -218,7 +218,7 @@ public class ToolResultFactoryTests
         var customStatus = "Custom Warning";
 
         // Act
-        var result = ToolResultFactory.Warning<AppClaimOutgoingDto>(message, customStatus);
+        var result = ToolResultFactory.Warning<ClaimOutgoingDto>(message, customStatus);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -234,7 +234,7 @@ public class ToolResultFactoryTests
         var customStatus = "Custom Error";
 
         // Act
-        var result = ToolResultFactory.Failure<AppClaimOutgoingDto>(errors, customStatus);
+        var result = ToolResultFactory.Failure<ClaimOutgoingDto>(errors, customStatus);
 
         // Assert
         Assert.False(result.IsSuccess);

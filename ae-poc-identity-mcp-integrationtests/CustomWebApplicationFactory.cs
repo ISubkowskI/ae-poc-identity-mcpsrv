@@ -50,7 +50,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             new() { Id = Guid.Parse("00000000-0000-0000-0000-000000000002"), Type = "role", Value = "admin", ValueType = "string", DisplayText = "Role" }
         };
 
-        MockClaimClient.Setup(c => c.LoadClaimsAsync(It.IsAny<CancellationToken>()))
+        MockClaimClient.Setup(c => c.LoadClaimsAsync(It.IsAny<ClaimsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(testClaims);
 
         MockClaimClient.Setup(c => c.LoadClaimDetailsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))

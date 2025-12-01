@@ -12,8 +12,10 @@ namespace Ae.Poc.Identity.Mcp.DataAnnotations
         {
             if (value is not IDictionary<string, string> properties)
                 return ValidationResult.Success;
+
             if (properties.Count > MaxItems)
                 return new ValidationResult($"Properties cannot exceed {MaxItems} items.");
+
             foreach (var kvp in properties)
             {
                 if (string.IsNullOrWhiteSpace(kvp.Key))

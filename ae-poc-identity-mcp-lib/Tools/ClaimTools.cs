@@ -2,9 +2,11 @@
 using Ae.Poc.Identity.Mcp.Dtos;
 using Ae.Poc.Identity.Mcp.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Ae.Poc.Identity.Mcp.Tools;
 
@@ -21,36 +23,62 @@ public static class ClaimTools
     /// </summary>
     [McpServerTool(Name = "identity-get_claims", UseStructuredContent = true)]
     [Description("Retrieve a list of claims.")]
-    public static async Task<ToolResult<IEnumerable<AppClaimOutgoingDto>, ErrorOutgoingDto>> GetClaimsAsync(
+    public static async Task<ToolResult<ClaimsOutgoingDto, ErrorOutgoingDto>> GetClaimsAsync(
+    [Description(@"Claim query parameters.
+Expected JSON structure:
+{
+  ""Skipped"": ""int"",
+  ""NumberOf"": ""int"",
+}")] ClaimsQueryIncomingDto queryIncomingDto,
         IClaimClient claimClient,
         IMapper mapper,
+        IDtoValidator validator,
         //ILogger<ClaimTools>? logger = null,
         CancellationToken ct = default)
     {
         try
         {
+            if (!validator.TryValidate(queryIncomingDto, out var validationResults))
+            {
+                var errors = validationResults.Select(r => r.ErrorMessage ?? "Unknown validation error").ToArray();
+                return ToolResultFactory.ValidationFailed<ClaimsOutgoingDto>(errors);
+            }
+
+            var claimsQuery = mapper.Map<ClaimsQuery>(queryIncomingDto);
+            if (claimsQuery == null)
+            {
+                //logger?.LogError(ex, "Failed to map query incoming Dto to claims query");
+                return ToolResultFactory.Failure<ClaimsOutgoingDto>(["Failed to map query incoming Dto to claims query"]);
+            }
+
             //logger?.LogInformation("Retrieving all claims");
-            var claims = (await claimClient.LoadClaimsAsync(ct));
+            var claims = await claimClient.LoadClaimsAsync(claimsQuery, ct);
             if (claims == null)
             {
                 //logger?.LogWarning("No claims found in the system");
-                return ToolResultFactory.Warning<IEnumerable<AppClaimOutgoingDto>>("No claims found");
+                return ToolResultFactory.Warning<ClaimsOutgoingDto>("No claims found");
             }
 
-            var res = mapper.Map<IEnumerable<AppClaimOutgoingDto>>(claims);
+            var res = mapper.Map<IEnumerable<ClaimOutgoingDto>>(claims);
             if (res == null)
             {
                 //logger?.LogError(ex, "Failed to map claims to outgoing DTOs");
-                return ToolResultFactory.Failure<IEnumerable<AppClaimOutgoingDto>>(["Failed to map claims to outgoing DTOs"]);
+                return ToolResultFactory.Failure<ClaimsOutgoingDto>(["Failed to map claims to outgoing DTOs"]);
             }
 
+            ClaimsOutgoingDto resDto = new ()
+            {
+                Claims = res,
+                ClaimsInfo = queryIncomingDto.WithClaimsInfo ? mapper.Map<ClaimsInfoOutgoingDto>(await claimClient.GetClaimsInfoAsync(ct)) : null
+            };
+
             //logger?.LogInformation("Successfully retrieved {ClaimCount} claims", res.Count());
-            return ToolResultFactory.Success(res);
+            return ToolResultFactory.Success(resDto);
         }
         catch (Exception ex)
         {
             //logger?.LogError(ex, "Error occurred while retrieving claims");
-            return ToolResultFactory.FromException<IEnumerable<AppClaimOutgoingDto>>(ex);
+            return ToolResultFactory.FromException<ClaimsOutgoingDto>(ex);
         }
     }
 
@@ -59,7 +87,7 @@ public static class ClaimTools
     /// </summary>
     [McpServerTool(Name = "identity-get_claim_details")]
     [Description("Retrieve details for a single claim by id.")]
-    public static async Task<ToolResult<AppClaimOutgoingDto, ErrorOutgoingDto>> GetClaimDetailsAsync(
+    public static async Task<ToolResult<ClaimOutgoingDto, ErrorOutgoingDto>> GetClaimDetailsAsync(
         [Description("The id of the claim to get details for")] string claimId,
         IClaimClient claimClient,
         IMapper mapper,
@@ -69,21 +97,21 @@ public static class ClaimTools
         {
             if (!TryParseClaimId(claimId, out _, out var errorMessage))
             {
-                return ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>([errorMessage ?? "Unknown validation error"]);
+                return ToolResultFactory.ValidationFailed<ClaimOutgoingDto>([errorMessage ?? "Unknown validation error"]);
             }
 
             var claim = await claimClient.LoadClaimDetailsAsync(claimId, ct);
             if (claim is null)
             {
-                return ToolResultFactory.Warning<AppClaimOutgoingDto>("Claim not found");
+                return ToolResultFactory.Warning<ClaimOutgoingDto>("Claim not found");
             }
 
-            var res = mapper.Map<AppClaimOutgoingDto>(claim);
+            var res = mapper.Map<ClaimOutgoingDto>(claim);
             return ToolResultFactory.Success(res);
         }
         catch (Exception ex)
         {
-            return ToolResultFactory.FromException<AppClaimOutgoingDto>(ex);
+            return ToolResultFactory.FromException<ClaimOutgoingDto>(ex);
         }
     }
 
@@ -92,7 +120,7 @@ public static class ClaimTools
     /// </summary>
     [McpServerTool(Name = "identity-delete_claim")]
     [Description("Delete a claim by id.")]
-    public static async Task<ToolResult<AppClaimOutgoingDto, ErrorOutgoingDto>> DeleteClaimAsync(
+    public static async Task<ToolResult<ClaimOutgoingDto, ErrorOutgoingDto>> DeleteClaimAsync(
         [Description("The id of the claim to delete")] string claimId,
         IClaimClient claimClient,
         IMapper mapper,
@@ -102,16 +130,16 @@ public static class ClaimTools
         {
             if (!TryParseClaimId(claimId, out _, out var errorMessage))
             {
-                return ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>([errorMessage ?? "Unknown validation error"]);
+                return ToolResultFactory.ValidationFailed<ClaimOutgoingDto>([errorMessage ?? "Unknown validation error"]);
             }
 
             var deletedClaim = await claimClient.DeleteClaimAsync(claimId, ct);
-            var res = mapper.Map<AppClaimOutgoingDto>(deletedClaim);
+            var res = mapper.Map<ClaimOutgoingDto>(deletedClaim);
             return ToolResultFactory.Success(res);
         }
         catch (Exception ex)
         {
-            return ToolResultFactory.FromException<AppClaimOutgoingDto>(ex);
+            return ToolResultFactory.FromException<ClaimOutgoingDto>(ex);
         }
     }
 
@@ -120,7 +148,7 @@ public static class ClaimTools
     /// </summary>
     [McpServerTool(Name = "identity-create_claim")]
     [Description("Create a new claim.")]
-    public static async Task<ToolResult<AppClaimOutgoingDto, ErrorOutgoingDto>> CreateClaimAsync(
+    public static async Task<ToolResult<ClaimOutgoingDto, ErrorOutgoingDto>> CreateClaimAsync(
         [Description(@"The data for the new claim. The server will assign the 'Id'.
 Expected JSON structure:
 {
@@ -130,7 +158,7 @@ Expected JSON structure:
   ""DisplayText"": ""string"",
   ""Properties"": { ""key1"": ""value1"", ... } (optional),
   ""Description"": ""string"" (optional, max 500 chars)
-}")] AppClaimCreateDto claimDto,
+}")] ClaimCreateDto claimDto,
         IClaimClient claimClient,
         IMapper mapper,
         IDtoValidator validator,
@@ -141,17 +169,17 @@ Expected JSON structure:
             if (!validator.TryValidate(claimDto, out var validationResults))
             {
                 var errors = validationResults.Select(r => r.ErrorMessage ?? "Unknown validation error").ToArray();
-                return ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>(errors);
+                return ToolResultFactory.ValidationFailed<ClaimOutgoingDto>(errors);
             }
 
             var appClaim = mapper.Map<AppClaim>(claimDto);
             var createdClaim = await claimClient.CreateClaimAsync(appClaim, ct);
-            var res = mapper.Map<AppClaimOutgoingDto>(createdClaim);
+            var res = mapper.Map<ClaimOutgoingDto>(createdClaim);
             return ToolResultFactory.Success(res);
         }
         catch (Exception ex)
         {
-            return ToolResultFactory.FromException<AppClaimOutgoingDto>(ex);
+            return ToolResultFactory.FromException<ClaimOutgoingDto>(ex);
         }
     }
 
@@ -160,7 +188,7 @@ Expected JSON structure:
     /// </summary>
     [McpServerTool(Name = "identity-update_claim")]
     [Description("Update a claim by id.")]
-    public static async Task<ToolResult<AppClaimOutgoingDto, ErrorOutgoingDto>> UpdateClaimAsync(
+    public static async Task<ToolResult<ClaimOutgoingDto, ErrorOutgoingDto>> UpdateClaimAsync(
         [Description("The id of the claim to update")] string claimId,
         [Description(@"The data to update the claim. The 'Id' in the body must match the 'claimId' in the path.
 Expected JSON structure:
@@ -172,7 +200,7 @@ Expected JSON structure:
   ""DisplayText"": ""string"",
   ""Properties"": { ""key1"": ""value1"", ... } (optional),
   ""Description"": ""string"" (optional, max 500 chars)
-}")] AppClaimUpdateDto claimDto,
+}")] ClaimUpdateDto claimDto,
         IClaimClient claimClient,
         IMapper mapper,
         IDtoValidator validator,
@@ -182,29 +210,29 @@ Expected JSON structure:
         {
             if (!TryParseClaimId(claimId, out var parsedClaimId, out var errorMessage))
             {
-                return ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>([errorMessage ?? "Unknown validation error"]);
+                return ToolResultFactory.ValidationFailed<ClaimOutgoingDto>([errorMessage ?? "Unknown validation error"]);
             }
 
             // Compare claimId with claimDto.Id
             if (parsedClaimId != claimDto.Id)
             {
-                return ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>(["The claimId path parameter must match the Id field in the request body."]);
+                return ToolResultFactory.ValidationFailed<ClaimOutgoingDto>(["The claimId path parameter must match the Id field in the request body."]);
             }
 
             if (!validator.TryValidate(claimDto, out var validationResults))
             {
                 var errors = validationResults.Select(r => r.ErrorMessage ?? "Unknown validation error").ToArray();
-                return ToolResultFactory.ValidationFailed<AppClaimOutgoingDto>(errors);
+                return ToolResultFactory.ValidationFailed<ClaimOutgoingDto>(errors);
             }
 
             var appClaim = mapper.Map<AppClaim>(claimDto);
             var updatedClaim = await claimClient.UpdateClaimAsync(claimId, appClaim, ct);
-            var res = mapper.Map<AppClaimOutgoingDto>(updatedClaim);
+            var res = mapper.Map<ClaimOutgoingDto>(updatedClaim);
             return ToolResultFactory.Success(res);
         }
         catch (Exception ex)
         {
-            return ToolResultFactory.FromException<AppClaimOutgoingDto>(ex);
+            return ToolResultFactory.FromException<ClaimOutgoingDto>(ex);
         }
     }
 

@@ -1,8 +1,8 @@
-@baseUrl = http://localhost:3001/identity
+@baseUrl = http://localhost:3001/mcp/v1
 // IMPORTANT: Replace the placeholder below with the actual value of
 // "ExpectedToken" from your appsettings.json file.
 @token = YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME
-@mcpSessionId = ooA6bHDdrPm6myWamxINTQ
+@mcpSessionId = K2PEu780HS1E1nDbfuNHNQ
 ## 2025-03-26
 @mcpProtocolVersion = 2025-06-18
 
@@ -10,7 +10,7 @@
 # 2. (TOOLS/LIST) - Run this request SECOND
 # (see mcp-listen.http)
 # The response will appear in the *first* request's window.
-POST {{baseUrl}}/mcp/message?sessionId={{mcpSessionId}}
+POST {{baseUrl}}/claims/message?sessionId={{mcpSessionId}}
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -25,7 +25,7 @@ Authorization: Bearer {{token}}
 # 3. (TOOLS/CALL) - Run this request SECOND
 # (see mcp-listen.http)
 # The response will appear in the *first* request's window.
-POST {{baseUrl}}/mcp/message?sessionId={{mcpSessionId}}
+POST {{baseUrl}}/claims/message?sessionId={{mcpSessionId}}
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -43,7 +43,7 @@ Authorization: Bearer {{token}}
 # 4. (TOOLS/CALL) - Run this request SECOND
 # (see mcp-listen.http)
 # The response will appear in the *first* request's window.
-POST {{baseUrl}}/mcp/message?sessionId={{mcpSessionId}}
+POST {{baseUrl}}/claims/message?sessionId={{mcpSessionId}}
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -52,7 +52,13 @@ Authorization: Bearer {{token}}
   "method": "tools/call",
   "params": {
     "name": "identity-get_claims",
-    "arguments": { }
+    "arguments": {
+        "queryIncomingDto":{
+          "Skipped": 0,
+          "NumberOf": 70
+        }
+    }
+    
   },
   "id": "msg-3"
 }

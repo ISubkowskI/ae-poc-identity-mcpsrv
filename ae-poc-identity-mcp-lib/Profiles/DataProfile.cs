@@ -7,8 +7,8 @@ namespace Ae.Poc.Identity.Mcp.Profiles;
 /// <summary>
 /// Configures AutoMapper profiles for mapping between domain entities and DTOs.
 /// This profile defines how <see cref="AppClaim"/> entities are mapped to and from
-/// various DTOs like <see cref="AppClaimOutgoingDto"/>, <see cref="AppClaimCreateDto"/>,
-/// <see cref="AppClaimUpdateDto"/>, and <see cref="AppClaimDto"/>.
+/// various DTOs like <see cref="ClaimOutgoingDto"/>, <see cref="ClaimCreateDto"/>,
+/// <see cref="ClaimUpdateDto"/>, and <see cref="ClaimDto"/>.
 /// </summary>
 public sealed class DataProfile : Profile
 {
@@ -18,10 +18,13 @@ public sealed class DataProfile : Profile
     /// </summary>
     public DataProfile()
     {
-        CreateMap<AppClaim, AppClaimOutgoingDto>();
-        CreateMap<AppClaimCreateDto, AppClaim>();
-        CreateMap<AppClaimUpdateDto, AppClaim>();
+        CreateMap<AppClaim, ClaimOutgoingDto>();
+        CreateMap<ClaimsInfo, ClaimsInfoOutgoingDto>();
+        CreateMap<ClaimCreateDto, AppClaim>();
+        CreateMap<ClaimUpdateDto, AppClaim>();
 
-        CreateMap<AppClaimDto, AppClaim>();
+        CreateMap<ClaimDto, AppClaim>();
+
+        CreateMap<ClaimsQueryIncomingDto, ClaimsQuery>();
     }
 }

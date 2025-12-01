@@ -58,11 +58,11 @@ public sealed class ClaimClient : IClaimClient
     {
         if (response.IsSuccessStatusCode)
         {
-            var dto = await response.Content.ReadFromJsonAsync<AppClaimDto>(cancellationToken: ct).ConfigureAwait(false);
+            var dto = await response.Content.ReadFromJsonAsync<ClaimDto>(cancellationToken: ct).ConfigureAwait(false);
             if (dto == null)
             {
                 // This indicates an API issue if a 2xx response has a null body when AppClaimDto is expected.
-                throw new InvalidOperationException($"API returned success for {operationDescription} but the response content was null or could not be deserialized to {nameof(AppClaimDto)}.");
+                throw new InvalidOperationException($"API returned success for {operationDescription} but the response content was null or could not be deserialized to {nameof(ClaimDto)}.");
             }
             return _mapper.Map<AppClaim>(dto);
         }
@@ -73,20 +73,29 @@ public sealed class ClaimClient : IClaimClient
         }
     }
 
+    public async Task<ClaimsInfo?> GetClaimsInfoAsync(CancellationToken ct = default)
+    {
+        // This method is not implemented yet.
+        return await Task.FromResult(new ClaimsInfo()
+        {
+            Count = 11
+        });
+    }
+
     /// <summary>
     /// Asynchronously loads all claims from the identity storage API.
     /// </summary>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains an enumerable of <see cref="AppClaim"/>.</returns>
     /// <exception cref="HttpRequestException">Thrown if the HTTP request fails.</exception>
-    public async Task<IEnumerable<AppClaim>?> LoadClaimsAsync(CancellationToken ct = default)
+    public async Task<IEnumerable<AppClaim>?> LoadClaimsAsync(ClaimsQuery claimsQuery, CancellationToken ct = default)
     {
         string requestUri = Flurl.Url.Combine(_apiOptions.ApiBasePath, ClaimsApiBaseEndpoint);
         _logger.LogInformation("Start {MethodName} for {RequestUri}...", nameof(LoadClaimsAsync), requestUri);
 
         try
         {
-            var dtoList = await _httpClient.GetFromJsonAsync<IEnumerable<AppClaimDto>>(requestUri: requestUri, cancellationToken: ct).ConfigureAwait(false);
+            var dtoList = await _httpClient.GetFromJsonAsync<IEnumerable<ClaimDto>>(requestUri: requestUri, cancellationToken: ct).ConfigureAwait(false);
             return _mapper.Map<IEnumerable<AppClaim>?>(dtoList);
         }
         catch (HttpRequestException httpEx)
@@ -116,7 +125,7 @@ public sealed class ClaimClient : IClaimClient
 
         try
         {
-            var res = await _httpClient.GetFromJsonAsync<AppClaimDto>(requestUri: requestUri, cancellationToken: ct).ConfigureAwait(false);
+            var res = await _httpClient.GetFromJsonAsync<ClaimDto>(requestUri: requestUri, cancellationToken: ct).ConfigureAwait(false);
             return _mapper.Map<AppClaim?>(res);
         }
         catch (HttpRequestException httpEx)
@@ -174,7 +183,7 @@ public sealed class ClaimClient : IClaimClient
 
         try
         {
-            var requestData = _mapper.Map<AppClaimDto>(appClaim);
+            var requestData = _mapper.Map<ClaimDto>(appClaim);
             var httpResponse = await _httpClient.PostAsJsonAsync(requestUri, requestData, ct).ConfigureAwait(false);
             return await ParseAppClaimResponseAsync(httpResponse, "creating new claim", ct);
         }
@@ -205,7 +214,7 @@ public sealed class ClaimClient : IClaimClient
 
         try
         {
-            var requestData = _mapper.Map<AppClaimDto>(appClaim);
+            var requestData = _mapper.Map<ClaimDto>(appClaim);
             var httpResponse = await _httpClient.PatchAsJsonAsync(requestUri, requestData, ct).ConfigureAwait(false);
             return await ParseAppClaimResponseAsync(httpResponse, $"updating claim '{claimId}'", ct);
         }
@@ -220,4 +229,6 @@ public sealed class ClaimClient : IClaimClient
             throw;
         }
     }
+
+    
 }

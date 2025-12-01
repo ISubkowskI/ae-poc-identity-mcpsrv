@@ -35,15 +35,22 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
     [Fact]
     public async Task GetClaimsAsync_ReturnsAllClaims_Integration()
     {
+        // Arrange
+        ClaimsQueryIncomingDto dto = new ()
+        {
+            Skipped = 0,
+            NumberOf = 10
+        };
+
         // Act
-        var result = await ClaimTools.GetClaimsAsync(_claimClient, _mapper);
+        var result = await ClaimTools.GetClaimsAsync(dto, _claimClient, _mapper, _validator);
 
         // Assert
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Value);
-        Assert.Equal(2, result.Value.Count());
-        Assert.Contains(result.Value, c => c.Type == "email");
-        Assert.Contains(result.Value, c => c.Type == "role");
+        Assert.Equal(2, result.Value.Claims.Count());
+        Assert.Contains(result.Value.Claims, c => c.Type == "email");
+        Assert.Contains(result.Value.Claims, c => c.Type == "role");
     }
 
     [Fact]
@@ -82,7 +89,7 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
     public async Task CreateClaimAsync_CreatesNewClaim_Integration()
     {
         // Arrange
-        var createDto = new AppClaimCreateDto
+        var createDto = new ClaimCreateDto
         {
             Type = "newclaim",
             Value = "newvalue",
@@ -106,7 +113,7 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
     public async Task CreateClaimAsync_ReturnsValidationFailed_WhenDtoIsInvalid_Integration()
     {
         // Arrange
-        var invalidDto = new AppClaimCreateDto
+        var invalidDto = new ClaimCreateDto
         {
             // Missing required fields
             Type = "",
@@ -130,7 +137,7 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
     {
         // Arrange
         var claimId = Guid.NewGuid();
-        var updateDto = new AppClaimUpdateDto
+        var updateDto = new ClaimUpdateDto
         {
             Id = claimId,
             Type = "updated",
@@ -155,7 +162,7 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
         // Arrange
         var pathId = Guid.NewGuid();
         var bodyId = Guid.NewGuid();
-        var updateDto = new AppClaimUpdateDto
+        var updateDto = new ClaimUpdateDto
         {
             Id = bodyId,
             Type = "test",
