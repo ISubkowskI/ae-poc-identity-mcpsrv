@@ -17,7 +17,8 @@ public static class AppInfoTool
     /// <summary>
     /// Returns the current application version and time information as a JSON object.
     /// </summary>
-    [McpServerTool(Name = "general-get_app_version", UseStructuredContent = true), Description("Returns the current application version, local time, UTC time, and UTC ticks as a JSON object.")]
+    [McpServerTool(Name = "general-get_app_version", UseStructuredContent = true)]
+    [Description("Returns the current application version, local time, UTC time, and UTC ticks as a JSON object.")]
     public static async Task<object> GetAppVersion(IOptions<AppOptions> appOptions)
     {
         string appVersion = appOptions?.Value?.Version ?? "?.?";

@@ -27,8 +27,8 @@ public static class ClaimTools
     [Description(@"Claim query parameters.
 Expected JSON structure:
 {
-  ""Skipped"": ""int"",
-  ""NumberOf"": ""int"",
+  ""skipped"": ""int"",
+  ""numberOf"": ""int"",
 }")] ClaimsQueryIncomingDto queryIncomingDto,
         IClaimClient claimClient,
         IMapper mapper,
@@ -37,6 +37,7 @@ Expected JSON structure:
         CancellationToken ct = default)
     {
         var logger = loggerFactory.CreateLogger("Ae.Poc.Identity.Mcp.Tools.ClaimTools");
+        
         try
         {
             if (!validator.TryValidate(queryIncomingDto, out var validationResults))
@@ -114,6 +115,7 @@ Expected JSON structure:
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Error occurred while retrieving claim details");
             return ToolResultFactory.FromException<ClaimOutgoingDto>(ex);
         }
     }
@@ -144,6 +146,7 @@ Expected JSON structure:
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Error occurred while deleting claim");
             return ToolResultFactory.FromException<ClaimOutgoingDto>(ex);
         }
     }
@@ -186,6 +189,7 @@ Expected JSON structure:
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Error occurred while creating claim");
             return ToolResultFactory.FromException<ClaimOutgoingDto>(ex);
         }
     }
@@ -241,6 +245,7 @@ Expected JSON structure:
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Error occurred while updating claim");
             return ToolResultFactory.FromException<ClaimOutgoingDto>(ex);
         }
     }

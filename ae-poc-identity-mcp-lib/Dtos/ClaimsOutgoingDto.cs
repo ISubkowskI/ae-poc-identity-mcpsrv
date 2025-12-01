@@ -7,7 +7,7 @@ namespace Ae.Poc.Identity.Mcp.Dtos
         [JsonPropertyName("claims")]
         public IEnumerable<ClaimOutgoingDto> Claims { get; init; } = Array.Empty<ClaimOutgoingDto>();
 
-        [JsonPropertyName("claimsinfo")]
+        [JsonPropertyName("claimsInfo")]
         public ClaimsInfoOutgoingDto? ClaimsInfo { get; init; }
     }
 }

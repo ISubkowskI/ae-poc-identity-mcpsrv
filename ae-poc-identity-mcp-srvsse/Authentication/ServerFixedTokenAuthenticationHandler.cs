@@ -18,13 +18,13 @@ public sealed class ServerFixedTokenAuthenticationHandler : AuthenticationHandle
 
     public ServerFixedTokenAuthenticationHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
+        ILoggerFactory loggerFactory,
         UrlEncoder encoder,
         IOptions<ServerAuthenticationOptions> serverAuthenticationOptions)
-        : base(options, logger, encoder)
+        : base(options, loggerFactory, encoder)
     {
         _srvAuthOptions = serverAuthenticationOptions?.Value ?? throw new ArgumentNullException(nameof(serverAuthenticationOptions));
-        _logger = logger.CreateLogger<ServerFixedTokenAuthenticationHandler>();
+        _logger = loggerFactory.CreateLogger<ServerFixedTokenAuthenticationHandler>();
     }
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()

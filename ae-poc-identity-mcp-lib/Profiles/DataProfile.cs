@@ -20,11 +20,14 @@ public sealed class DataProfile : Profile
     {
         CreateMap<AppClaim, ClaimOutgoingDto>();
         CreateMap<ClaimsInfo, ClaimsInfoOutgoingDto>();
-        CreateMap<ClaimCreateDto, AppClaim>();
+        CreateMap<ClaimCreateDto, AppClaim>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore());
         CreateMap<ClaimUpdateDto, AppClaim>();
 
         CreateMap<ClaimDto, AppClaim>();
 
-        CreateMap<ClaimsQueryIncomingDto, ClaimsQuery>();
+        CreateMap<ClaimsQueryIncomingDto, ClaimsQuery>()
+            .ForMember(dest => dest.Skipped, opt => opt.MapFrom(src => src.Skipped))
+            .ForMember(dest => dest.NumberOf, opt => opt.MapFrom(src => src.NumberOf));
     }
 }

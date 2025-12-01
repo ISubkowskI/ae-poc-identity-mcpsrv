@@ -2,13 +2,12 @@
 // IMPORTANT: Replace the placeholder below with the actual value of
 // "ExpectedToken" from your appsettings.json file.
 @token = YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME
-@mcpSessionId = JXxJj4CIwx9U_Ar22nreGA
+@mcpSessionId = AoU4JOfr-Z4i0pKqj01GFQ
 ## 2025-03-26
 @mcpProtocolVersion = 2025-06-18
 
 ### "Discover" Request
-# 2. (TOOLS/LIST) - Run this request SECOND
-# (see mcp-listen.http)
+# 2. (TOOLS/LIST) - Run this request SECOND (see mcp-listen.http)
 # The response will appear in the *first* request's window.
 POST {{baseUrl}}/claims/message?sessionId={{mcpSessionId}}
 Content-Type: application/json
@@ -18,12 +17,11 @@ Authorization: Bearer {{token}}
   "jsonrpc": "2.0",
   "method": "tools/list",
   "params": {},
-  "id": "msg-1"
+  "id": "msg-2"
 }
 
 ###
-# 3. (TOOLS/CALL) - Run this request SECOND
-# (see mcp-listen.http)
+# 3. (TOOLS/CALL) - Run this request SECOND (see mcp-listen.http)
 # The response will appear in the *first* request's window.
 POST {{baseUrl}}/claims/message?sessionId={{mcpSessionId}}
 Content-Type: application/json
@@ -36,12 +34,11 @@ Authorization: Bearer {{token}}
     "name": "general-get_app_version",
     "arguments": { }
   },
-  "id": "msg-2"
+  "id": "msg-3"
 }
 
 ###
-# 4. (TOOLS/CALL) - Run this request SECOND
-# (see mcp-listen.http)
+# 4. (TOOLS/CALL) - Run this request SECOND (see mcp-listen.http)
 # The response will appear in the *first* request's window.
 POST {{baseUrl}}/claims/message?sessionId={{mcpSessionId}}
 Content-Type: application/json
@@ -54,12 +51,35 @@ Authorization: Bearer {{token}}
     "name": "identity-get_claims",
     "arguments": {
         "queryIncomingDto":{
-          "Skipped": 0,
-          "NumberOf": 70
+          "skipped": 0,
+          "numberOf": 5
         }
     }
-    
   },
-  "id": "msg-3"
+  "id": "msg-4"
 }
+
+###
+# 4a. (TOOLS/CALL) - Run this request SECOND (see mcp-listen.http)
+# The response will appear in the *first* request's window.
+POST {{baseUrl}}/claims/message?sessionId={{mcpSessionId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "identity-get_claims",
+    "arguments": {
+        "queryIncomingDto":{
+          "skipped": 1,
+          "numberOf": 6,
+          "withClaimsInfo": true
+        }
+    }
+  },
+  "id": "msg-4a"
+}
+
 

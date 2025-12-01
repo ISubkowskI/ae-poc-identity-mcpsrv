@@ -6,6 +6,7 @@ using AutoMapper;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
 
 namespace Ae.Poc.Identity.Mcp.Benchmarks;
 
@@ -48,7 +49,7 @@ public class ClaimToolsBenchmark
         _claimClient = new FakeClaimClient(_testClaims);
         var config = new MapperConfiguration(cfg => { cfg.CreateMap<AppClaim, ClaimOutgoingDto>(); }, _loggerFactory);
         _mapper = config.CreateMapper();
-        //ToDo _validator = 
+        _validator = new FakeValidator();
     }
 
     [Benchmark]
@@ -75,5 +76,14 @@ public class ClaimToolsBenchmark
         public Task<AppClaim> DeleteClaimAsync(string claimId, CancellationToken ct = default) => throw new NotImplementedException();
         public Task<AppClaim> CreateClaimAsync(AppClaim appClaim, CancellationToken ct = default) => throw new NotImplementedException();
         public Task<AppClaim> UpdateClaimAsync(string claimId, AppClaim appClaim, CancellationToken ct = default) => throw new NotImplementedException();
+    }
+
+    private sealed class FakeValidator : IDtoValidator
+    {
+        public bool TryValidate(object dto, out ICollection<ValidationResult> results)
+        {
+            results = new List<ValidationResult>();
+            return true;
+        }
     }
 }
