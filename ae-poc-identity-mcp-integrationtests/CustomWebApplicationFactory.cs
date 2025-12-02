@@ -53,6 +53,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         MockClaimClient.Setup(c => c.LoadClaimsAsync(It.IsAny<ClaimsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(testClaims);
 
+        MockClaimClient.Setup(c => c.GetClaimsInfoAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ClaimsInfo { TotalCount = testClaims.Count });
+
         MockClaimClient.Setup(c => c.LoadClaimDetailsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((string id, CancellationToken ct) =>
             {

@@ -79,7 +79,7 @@ public sealed class ClaimClient : IClaimClient
         // This method is not implemented yet.
         return await Task.FromResult(new ClaimsInfo()
         {
-            Count = 11
+            TotalCount = 11
         });
     }
 

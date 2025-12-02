@@ -5,6 +5,6 @@ namespace Ae.Poc.Identity.Mcp.Dtos
     public sealed record ClaimsInfoOutgoingDto
     {
         [JsonPropertyName("count")]
-        public int Count { get; init; } = 0;
+        public int TotalCount { get; init; } = 0;
     }
 }

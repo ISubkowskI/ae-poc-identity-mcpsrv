@@ -2,6 +2,6 @@
 {
     public sealed record ClaimsInfo
     {
-        public int Count { get; init; } = 0;
+        public int TotalCount { get; init; } = 0;
     }
 }

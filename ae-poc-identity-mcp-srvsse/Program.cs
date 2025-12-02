@@ -39,6 +39,7 @@ try
     });
 
     builder.Services.AddScoped<IDtoValidator, DtoValidator>();
+    builder.Services.AddScoped<IClaimTools, ClaimTools>();
     builder.Services.AddHttpClient<IClaimClient, ClaimClient>()
         .ConfigureHttpClient(client =>
         {
