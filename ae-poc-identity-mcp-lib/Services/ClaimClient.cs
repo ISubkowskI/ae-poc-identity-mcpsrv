@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using Ae.Poc.Identity.Mcp.Dtos;
 using Ae.Poc.Identity.Mcp.Settings;
 using Ae.Poc.Identity.Mcp.Data;
+using Flurl;
 
 namespace Ae.Poc.Identity.Mcp.Services;
 
@@ -78,7 +79,7 @@ public sealed class ClaimClient : IClaimClient
         // This method is not implemented yet.
         return await Task.FromResult(new ClaimsInfo()
         {
-            Count = 17
+            Count = 11
         });
     }
 
@@ -90,7 +91,13 @@ public sealed class ClaimClient : IClaimClient
     /// <exception cref="HttpRequestException">Thrown if the HTTP request fails.</exception>
     public async Task<IEnumerable<AppClaim>?> LoadClaimsAsync(ClaimsQuery claimsQuery, CancellationToken ct = default)
     {
-        string requestUri = Flurl.Url.Combine(_apiOptions.ApiBasePath, ClaimsApiBaseEndpoint);
+        string requestUri = Flurl.Url.Combine(_apiOptions.ApiBasePath, ClaimsApiBaseEndpoint)
+            .SetQueryParams(new
+            {
+                skipped = claimsQuery.Skipped,
+                numberOf = claimsQuery.NumberOf
+            });
+
         _logger.LogInformation("Start {MethodName} for {RequestUri}...", nameof(LoadClaimsAsync), requestUri);
 
         try
@@ -230,5 +237,5 @@ public sealed class ClaimClient : IClaimClient
         }
     }
 
-    
+
 }

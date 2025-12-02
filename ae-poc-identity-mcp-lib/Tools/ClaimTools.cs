@@ -87,7 +87,7 @@ Expected JSON structure:
     /// <summary>
     /// Retrieves the details of a specific claim by its ID, maps it to a DTO, and serializes the result to JSON.
     /// </summary>
-    [McpServerTool(Name = "identity-get_claim_details")]
+    [McpServerTool(Name = "identity-get_claim_details", UseStructuredContent = true)]
     [Description("Retrieve details for a single claim by id.")]
     public static async Task<ToolResult<ClaimOutgoingDto, ErrorOutgoingDto>> GetClaimDetailsAsync(
         [Description("The id of the claim to get details for")] string claimId,

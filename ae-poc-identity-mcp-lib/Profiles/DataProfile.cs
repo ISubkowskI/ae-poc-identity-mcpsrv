@@ -1,6 +1,7 @@
 ﻿using Ae.Poc.Identity.Mcp.Data;
 using Ae.Poc.Identity.Mcp.Dtos;
 using AutoMapper;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ae.Poc.Identity.Mcp.Profiles;
 
@@ -27,7 +28,17 @@ public sealed class DataProfile : Profile
         CreateMap<ClaimDto, AppClaim>();
 
         CreateMap<ClaimsQueryIncomingDto, ClaimsQuery>()
-            .ForMember(dest => dest.Skipped, opt => opt.MapFrom(src => src.Skipped))
-            .ForMember(dest => dest.NumberOf, opt => opt.MapFrom(src => src.NumberOf));
+            .ForMember(dest => dest.Skipped, opt => opt.MapFrom(src => (src.Skipped < 0) ? 0 : src.Skipped))
+            .ForMember(dest => dest.NumberOf, opt => opt.MapFrom(src => ValidateNumberOf(src.NumberOf)));
+    }
+
+    private int ValidateNumberOf(int numberOf)
+    {
+        return numberOf switch
+        {
+            < 1 => 0,
+            > 100 => 100,
+            _ => numberOf
+        };
     }
 }

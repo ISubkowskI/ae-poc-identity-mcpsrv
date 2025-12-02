@@ -2,7 +2,7 @@
 // IMPORTANT: Replace the placeholder below with the actual value of
 // "ExpectedToken" from your appsettings.json file.
 @token = YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME
-@mcpSessionId = AoU4JOfr-Z4i0pKqj01GFQ
+@mcpSessionId = 2CWti_NOmEvjWJ-Ob67NjQ
 ## 2025-03-26
 @mcpProtocolVersion = 2025-06-18
 
@@ -52,7 +52,7 @@ Authorization: Bearer {{token}}
     "arguments": {
         "queryIncomingDto":{
           "skipped": 0,
-          "numberOf": 5
+          "numberOf": 50
         }
     }
   },
@@ -60,7 +60,7 @@ Authorization: Bearer {{token}}
 }
 
 ###
-# 4a. (TOOLS/CALL) - Run this request SECOND (see mcp-listen.http)
+# 5. (TOOLS/CALL) - Run this request SECOND (see mcp-listen.http)
 # The response will appear in the *first* request's window.
 POST {{baseUrl}}/claims/message?sessionId={{mcpSessionId}}
 Content-Type: application/json
@@ -70,16 +70,11 @@ Authorization: Bearer {{token}}
   "jsonrpc": "2.0",
   "method": "tools/call",
   "params": {
-    "name": "identity-get_claims",
+    "name": "identity-get_claim_details",
     "arguments": {
-        "queryIncomingDto":{
-          "skipped": 1,
-          "numberOf": 6,
-          "withClaimsInfo": true
-        }
+        "claimId": "5d9fed9e-8c3e-4393-86b0-8d4ced880125"
     }
   },
-  "id": "msg-4a"
+  "id": "msg-5"
 }
-
 
