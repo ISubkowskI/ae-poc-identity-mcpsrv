@@ -7,20 +7,19 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using System.Reflection;
 
-Log.Logger = new LoggerConfiguration()
-           .MinimumLevel.Verbose()
-           //.WriteTo.Debug()
-           .WriteTo.Console(standardErrorFromLevel: Serilog.Events.LogEventLevel.Verbose)
-           .CreateBootstrapLogger();
+var logConfig = new LoggerConfiguration()
+    .MinimumLevel.Verbose()
+    .WriteTo.Console(standardErrorFromLevel: Serilog.Events.LogEventLevel.Verbose);
+Log.Logger = logConfig.CreateBootstrapLogger();
 
 try
 {
-    Log.Debug("App starting ... '{Env}' Working directory: '{Directory}'",
-      Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? string.Empty,
-      Environment.CurrentDirectory);
+    Log.Debug("App starting ... '{Env}'", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? string.Empty);
+    Log.Debug("Working directory: '{CurrentDirectory}'", Environment.CurrentDirectory);
     var exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
     var builder = WebApplication.CreateBuilder(args);
@@ -40,10 +39,20 @@ try
     });
 
     builder.Services.AddScoped<IDtoValidator, DtoValidator>();
-    builder.Services.AddHttpClient<IClaimClient, ClaimClient>();
+    builder.Services.AddScoped<IClaimTools, ClaimTools>();
+    builder.Services.AddHttpClient<IClaimClient, ClaimClient>()
+        .ConfigureHttpClient(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(30);
+        })
+        .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+        {
+            PooledConnectionLifetime = TimeSpan.FromMinutes(15),
+            MaxConnectionsPerServer = 25
+        });
 
     var appOptions = builder.Configuration.GetSection(AppOptions.App).Get<AppOptions>() ?? new AppOptions();
-    Log.Information($"{appOptions.Name} ver:{appOptions.Version}");
+    Log.Information("{AppName} ver:{AppVersion}", appOptions.Name, appOptions.Version);
 
     // Add Authentication Services
     var srvAuthOptions = builder.Configuration.GetSection(ServerAuthenticationOptions.Authentication)
@@ -54,6 +63,10 @@ try
             options.TimeProvider = TimeProvider.System;
         });
     builder.Services.AddAuthorization();
+
+    //builder.Services.AddHealthChecks()
+    //    .AddCheck<ClaimClientHealthCheck>("claim-api")
+    //    .AddCheck("self", () => HealthCheckResult.Healthy());
 
     // MCP Server Setup
     builder.Services
@@ -69,6 +82,7 @@ try
     var webapp = builder.Build();
     webapp.UseAuthentication();
     webapp.UseAuthorization();
+    //webapp.MapHealthChecks("/health");
     webapp.MapMcp(appOptions.MapMcpPattern)
         .RequireAuthorization(); // Protect the MCP endpoint
 
@@ -84,3 +98,6 @@ finally
 {
     Log.CloseAndFlush();
 }
+
+// Make Program class accessible for integration testing with WebApplicationFactory
+public partial class Program { }

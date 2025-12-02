@@ -3,8 +3,10 @@ using System.ComponentModel;
 
 namespace Ae.Poc.Identity.Mcp.Dtos;
 
-public sealed record AppClaimCreateDto
+public sealed record ClaimUpdateDto
 {
+    public Guid Id { get; init; } = Guid.Empty;
+
     [Required(ErrorMessage = "The Type field is required")]
     [Description("The type of the claim (e.g., 'email', 'role'). This field is mandatory.")]
     public string Type { get; init; } = string.Empty;

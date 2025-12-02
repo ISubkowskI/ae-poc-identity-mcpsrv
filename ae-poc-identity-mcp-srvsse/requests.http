@@ -1,16 +1,15 @@
-@baseUrl = http://localhost:3001/identity
+@baseUrl = http://localhost:3001/mcp/v1
 // IMPORTANT: Replace the placeholder below with the actual value of
 // "ExpectedToken" from your appsettings.json file.
 @token = YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME
-@mcpSessionId = wxkZ4oPFcT7kA1xlzxOlRg
+@mcpSessionId = l-M9Dw5T5FNWRHTG6b1WYA
 ## 2025-03-26
 @mcpProtocolVersion = 2025-06-18
 
 ### "Discover" Request
-# 2. (TOOLS/LIST) - Run this request SECOND
-# (see mcp-listen.http)
+# 2. (TOOLS/LIST) - Run this request SECOND (see mcp-listen.http)
 # The response will appear in the *first* request's window.
-POST {{baseUrl}}/mcp/message?sessionId={{mcpSessionId}}
+POST {{baseUrl}}/claims/message?sessionId={{mcpSessionId}}
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -18,14 +17,13 @@ Authorization: Bearer {{token}}
   "jsonrpc": "2.0",
   "method": "tools/list",
   "params": {},
-  "id": "msg-1"
+  "id": "msg-2"
 }
 
 ###
-# 3. (TOOLS/CALL) - Run this request SECOND
-# (see mcp-listen.http)
+# 3. (TOOLS/CALL) - Run this request SECOND (see mcp-listen.http)
 # The response will appear in the *first* request's window.
-POST {{baseUrl}}/mcp/message?sessionId={{mcpSessionId}}
+POST {{baseUrl}}/claims/message?sessionId={{mcpSessionId}}
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -36,14 +34,13 @@ Authorization: Bearer {{token}}
     "name": "general-get_app_version",
     "arguments": { }
   },
-  "id": "msg-2"
+  "id": "msg-3"
 }
 
 ###
-# 4. (TOOLS/CALL) - Run this request SECOND
-# (see mcp-listen.http)
+# 4. (TOOLS/CALL) - Run this request SECOND (see mcp-listen.http)
 # The response will appear in the *first* request's window.
-POST {{baseUrl}}/mcp/message?sessionId={{mcpSessionId}}
+POST {{baseUrl}}/claims/message?sessionId={{mcpSessionId}}
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -52,8 +49,32 @@ Authorization: Bearer {{token}}
   "method": "tools/call",
   "params": {
     "name": "identity-get_claims",
-    "arguments": { }
+    "arguments": {
+        "queryIncomingDto":{
+          "skipped": 0,
+          "numberOf": 50
+        }
+    }
   },
-  "id": "msg-3"
+  "id": "msg-4"
+}
+
+###
+# 5. (TOOLS/CALL) - Run this request SECOND (see mcp-listen.http)
+# The response will appear in the *first* request's window.
+POST {{baseUrl}}/claims/message?sessionId={{mcpSessionId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "identity-get_claim_details",
+    "arguments": {
+        "claimId": "22572c9f-1361-40ed-a8b0-6fb8be09782d"
+    }
+  },
+  "id": "msg-5"
 }
 
