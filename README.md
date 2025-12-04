@@ -31,7 +31,14 @@ Before running the application, you need to ensure the required API service is r
 
 
 ## Testing the MCP Server
-You can use the provided `mcp-listen.http`, `requests.http` files to test the MCP server.
+You can use the provided `ae-poc-identity-mcp-srvsse/mcp-listen.http`, `ae-poc-identity-mcp-srvsse/requests.http` files to test the MCP server.
+
+## Health Checks
+You can manually check the health of the service using the provided `health.http` file.
+
+1. Open `ae-poc-identity-mcp-srvsse/health.http`.
+2. Ensure the application is running.
+3. Click "Send Request" above the `GET` request to verify the service status.
 
 ## Running with Docker
 
