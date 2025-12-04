@@ -40,6 +40,7 @@ try
 
     builder.Services
         .Configure<AppOptions>(builder.Configuration.GetSection(AppOptions.App))
+        .Configure<HealthOptions>(builder.Configuration.GetSection(HealthOptions.Health))
         .Configure<ServerAuthenticationOptions>(builder.Configuration.GetSection(ServerAuthenticationOptions.Authentication))
         .Configure<IdentityStorageApiOptions>(builder.Configuration.GetSection(IdentityStorageApiOptions.IdentityStorageApi));
 
@@ -62,6 +63,7 @@ try
         });
 
     var appOptions = builder.Configuration.GetSection(AppOptions.App).Get<AppOptions>() ?? new AppOptions();
+    var healthOptions = builder.Configuration.GetSection(HealthOptions.Health).Get<HealthOptions>() ?? new HealthOptions();
     Log.Information("{AppName} ver:{AppVersion}", appOptions.Name, appOptions.Version);
 
     // Add Authentication Services
@@ -74,7 +76,7 @@ try
         });
     builder.Services.AddAuthorization();
 
-    if (!appOptions.DisableHealthChecks)
+    if (healthOptions.Enabled)
     {
         builder.Services.AddHealthChecks()
             .AddCheck<ClaimClientHealthCheck>("claim-api")
@@ -96,12 +98,20 @@ try
     webapp.UseAuthentication();
     webapp.UseAuthorization();
 
-    if (!appOptions.DisableHealthChecks)
+    if (healthOptions.Enabled)
     {
-        webapp.MapHealthChecks(appOptions.HealthCheckPath, new HealthCheckOptions
+        // Liveness: Checks only "self"
+        webapp.MapHealthChecks(healthOptions.LivePath, new HealthCheckOptions
         {
-            // Ensure we run *all* checks (default Behavior) 
+            Predicate = r => r.Name.Contains("self"),
+            ResponseWriter = HealthChecks.UI.Client.UIResponseWriter.WriteHealthCheckUIResponse
+        });
+
+        // Readiness: Checks everything
+        webapp.MapHealthChecks(healthOptions.ReadyPath, new HealthCheckOptions
+        {
             Predicate = _ => true,
+            ResponseWriter = HealthChecks.UI.Client.UIResponseWriter.WriteHealthCheckUIResponse
         });
     }
     webapp.MapMcp(appOptions.MapMcpPattern)

@@ -40,6 +40,25 @@ You can manually check the health of the service using the provided `health.http
 2. Ensure the application is running.
 3. Click "Send Request" above the `GET` request to verify the service status.
 
+### Kubernetes Configuration
+Configure your Liveness and Readiness probes as follows:
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 10
+```
+
 ## Running with Docker
 
 You can also run the MCP server using Docker.

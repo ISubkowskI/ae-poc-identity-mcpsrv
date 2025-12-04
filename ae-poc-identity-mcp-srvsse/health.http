@@ -1,5 +1,9 @@
 @host = http://localhost:3001
 
-### Health Check
-GET {{host}}/health
+### Liveness Probe (Self)
+GET {{host}}/health/live
+Accept: application/json
+
+### Readiness Probe (Dependencies)
+GET {{host}}/health/ready
 Accept: application/json

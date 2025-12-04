@@ -20,9 +20,5 @@
         public string Url { get; set; } = string.Empty;
 
         public string MapMcpPattern { get; set; } = string.Empty;
-
-        public string HealthCheckPath { get; set; } = "/health";
-
-        public bool DisableHealthChecks { get; set; } = false;
     }
 }

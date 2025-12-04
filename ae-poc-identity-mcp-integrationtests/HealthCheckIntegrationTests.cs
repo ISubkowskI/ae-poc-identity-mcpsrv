@@ -35,12 +35,13 @@ public class HealthCheckIntegrationTests : IClassFixture<CustomWebApplicationFac
             .ReturnsAsync(new ClaimsInfo { TotalCount = 10 });
 
         // Act
-        var response = await client.GetAsync("/health");
+        var response = await client.GetAsync("/health/ready");
 
+        // Assert
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadAsStringAsync();
-        content.Should().Be("Healthy");
+        content.Should().Contain("\"status\":\"Healthy\"");
     }
 
     [Fact]
@@ -55,12 +56,38 @@ public class HealthCheckIntegrationTests : IClassFixture<CustomWebApplicationFac
             .ThrowsAsync(new Exception("Backend down"));
 
         // Act
-        var response = await client.GetAsync("/health");
+        var response = await client.GetAsync("/health/ready");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
         var content = await response.Content.ReadAsStringAsync();
-        content.Should().Be("Unhealthy");
+        content.Should().Contain("\"status\":\"Unhealthy\"");
+    }
+
+    [Fact]
+    public async Task GetHealth_ReturnsJsonStructure_WhenHealthy()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        
+        // Mock backend to return success
+        _factory.MockClaimClient
+            .Setup(c => c.GetClaimsInfoAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ClaimsInfo { TotalCount = 10 });
+
+        // Act
+        var response = await client.GetAsync("/health/ready");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content.ReadAsStringAsync();
+        
+        // Simple string checks for JSON structure to avoid adding System.Text.Json dependency if not present,
+        // but robust enough to verify the UIResponseWriter is working.
+        content.Should().Contain("\"status\":\"Healthy\"");
+        content.Should().Contain("\"entries\":");
+        content.Should().Contain("\"claim-api\":");
+        content.Should().Contain("\"self\":");
     }
 
     [Fact]
@@ -69,11 +96,11 @@ public class HealthCheckIntegrationTests : IClassFixture<CustomWebApplicationFac
         // Arrange
         var client = _factory.WithWebHostBuilder(builder =>
         {
-            builder.UseSetting("App:DisableHealthChecks", "true");
+            builder.UseSetting("Health:Enabled", "false");
         }).CreateClient();
 
         // Act
-        var response = await client.GetAsync("/health");
+        var response = await client.GetAsync("/health/ready");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
