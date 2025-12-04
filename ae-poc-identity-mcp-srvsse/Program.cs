@@ -25,6 +25,14 @@ try
     var exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
     var builder = WebApplication.CreateBuilder(args);
+
+    // Explicitly configure configuration sources
+    builder.Configuration
+        .SetBasePath(builder.Environment.ContentRootPath)
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+        .AddEnvironmentVariables()
+        .AddCommandLine(args);
     builder.Services.AddSerilog((services, lc) => lc
         .ReadFrom.Configuration(builder.Configuration)
         .ReadFrom.Services(services)
