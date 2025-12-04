@@ -1,11 +1,7 @@
 using Ae.Poc.Identity.Mcp.Data;
-using Ae.Poc.Identity.Mcp.Dtos;
-using Ae.Poc.Identity.Mcp.Services;
 using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System.Net;
-using Xunit;
 
 namespace Ae.Poc.Identity.Mcp.IntegrationTests;
 
