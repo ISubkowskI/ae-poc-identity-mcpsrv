@@ -7,6 +7,7 @@ using Ae.Poc.Identity.Mcp.Tools;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -83,6 +84,14 @@ try
             .AddCheck("self", () => HealthCheckResult.Healthy());
     }
 
+    if (healthOptions.Enabled && healthOptions.Port.HasValue)
+    {
+        builder.WebHost.ConfigureKestrel((context, options) =>
+        {
+            options.ListenAnyIP(healthOptions.Port.Value);
+        });
+    }
+
     // MCP Server Setup
     builder.Services
         .AddMcpServer(options =>
@@ -101,18 +110,24 @@ try
     if (healthOptions.Enabled)
     {
         // Liveness: Checks only "self"
-        webapp.MapHealthChecks(healthOptions.LivePath, new HealthCheckOptions
+        var liveCheck = webapp.MapHealthChecks(healthOptions.LivePath, new HealthCheckOptions
         {
             Predicate = r => r.Name.Contains("self"),
             ResponseWriter = HealthChecks.UI.Client.UIResponseWriter.WriteHealthCheckUIResponse
         });
 
         // Readiness: Checks everything
-        webapp.MapHealthChecks(healthOptions.ReadyPath, new HealthCheckOptions
+        var readyCheck = webapp.MapHealthChecks(healthOptions.ReadyPath, new HealthCheckOptions
         {
             Predicate = _ => true,
             ResponseWriter = HealthChecks.UI.Client.UIResponseWriter.WriteHealthCheckUIResponse
         });
+
+        if (healthOptions.Port.HasValue)
+        {
+            liveCheck.RequireHost($"*:{healthOptions.Port}");
+            readyCheck.RequireHost($"*:{healthOptions.Port}");
+        }
     }
     webapp.MapMcp(appOptions.MapMcpPattern)
         .RequireAuthorization(); // Protect the MCP endpoint

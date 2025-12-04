@@ -6,6 +6,8 @@ namespace Ae.Poc.Identity.Mcp.Settings
 
         public bool Enabled { get; set; } = true;
 
+        public int? Port { get; set; }
+
 
 
         public string LivePath { get; set; } = "/health/live";
