@@ -15,6 +15,11 @@ namespace Ae.Poc.Identity.Mcp.IntegrationTests;
 /// </summary>
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
+    public CustomWebApplicationFactory()
+    {
+        Console.WriteLine("CustomWebApplicationFactory constructor called");
+    }
+
     public Mock<IClaimClient> MockClaimClient { get; } = new Mock<IClaimClient>();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -39,6 +44,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         });
 
         builder.UseEnvironment("Testing");
+        builder.UseSetting("App:Url", ""); // Prevent binding to fixed port
     }
 
     public void SetupMockClaimClient()

@@ -2,9 +2,11 @@
 using Ae.Poc.Identity.Mcp.Profiles;
 using Ae.Poc.Identity.Mcp.Services;
 using Ae.Poc.Identity.Mcp.Settings;
+using Ae.Poc.Identity.Mcp.SrvSse.Services;
 using Ae.Poc.Identity.Mcp.Tools;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -64,9 +66,12 @@ try
         });
     builder.Services.AddAuthorization();
 
-    //builder.Services.AddHealthChecks()
-    //    .AddCheck<ClaimClientHealthCheck>("claim-api")
-    //    .AddCheck("self", () => HealthCheckResult.Healthy());
+    if (!appOptions.DisableHealthChecks)
+    {
+        builder.Services.AddHealthChecks()
+            .AddCheck<ClaimClientHealthCheck>("claim-api")
+            .AddCheck("self", () => HealthCheckResult.Healthy());
+    }
 
     // MCP Server Setup
     builder.Services
@@ -82,11 +87,26 @@ try
     var webapp = builder.Build();
     webapp.UseAuthentication();
     webapp.UseAuthorization();
-    //webapp.MapHealthChecks("/health");
+
+    if (!appOptions.DisableHealthChecks)
+    {
+        webapp.MapHealthChecks(appOptions.HealthCheckPath, new HealthCheckOptions
+        {
+            // Ensure we run *all* checks (default Behavior) 
+            Predicate = _ => true,
+        });
+    }
     webapp.MapMcp(appOptions.MapMcpPattern)
         .RequireAuthorization(); // Protect the MCP endpoint
 
-    await webapp.RunAsync(appOptions.Url);
+    if (!string.IsNullOrWhiteSpace(appOptions.Url))
+    {
+        await webapp.RunAsync(appOptions.Url);
+    }
+    else
+    {
+        await webapp.RunAsync();
+    }
     return 0;
 }
 catch (Exception exc)
