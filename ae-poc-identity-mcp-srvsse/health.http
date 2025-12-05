@@ -1,9 +1,9 @@
-@host = http://localhost:8081
+@host = http://localhost:9007
 
 ### Liveness Probe (Self)
-GET http://localhost:8081/health/live
+GET http://localhost:9007/health/live
 Accept: application/json
 
 ### Readiness Probe (Dependencies)
-GET http://localhost:8081/health/ready
+GET http://localhost:9007/health/ready
 Accept: application/json

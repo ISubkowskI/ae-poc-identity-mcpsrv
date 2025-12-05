@@ -47,14 +47,14 @@ Configure your Liveness and Readiness probes as follows:
 livenessProbe:
   httpGet:
     path: /health/live
-    port: 8080
+    port: 9007
   initialDelaySeconds: 5
   periodSeconds: 10
 
 readinessProbe:
   httpGet:
     path: /health/ready
-    port: 8080
+    port: 9007
   initialDelaySeconds: 5
   periodSeconds: 10
 ```
@@ -76,7 +76,7 @@ docker build -t ae-poc-identity-mcp-srvsse -f ae-poc-identity-mcp-srvsse/Dockerf
 Run the container, mapping port 8080 to a host port (e.g., 3001). You can override configuration settings using environment variables.
 
 ```bash
-docker run --rm -p 3001:8080 \
+docker run --rm -p 3001:8080 -p 9007:9007 \
   -e Authentication__ExpectedToken="YOUR_SECURE_TOKEN" \
   -e IdentityStorageApi__ApiUrl="http://host.docker.internal:5023" \
   ae-poc-identity-mcp-srvsse

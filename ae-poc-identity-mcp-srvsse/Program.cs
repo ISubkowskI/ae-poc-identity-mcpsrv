@@ -1,4 +1,5 @@
 ﻿using Ae.Poc.Identity.Mcp.Authentication;
+using Ae.Poc.Identity.Mcp.Extensions;
 using Ae.Poc.Identity.Mcp.Profiles;
 using Ae.Poc.Identity.Mcp.Services;
 using Ae.Poc.Identity.Mcp.Settings;
@@ -6,12 +7,11 @@ using Ae.Poc.Identity.Mcp.SrvSse.Services;
 using Ae.Poc.Identity.Mcp.Tools;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
+using System.Net;
 using System.Reflection;
 
 var logConfig = new LoggerConfiguration()
@@ -65,6 +65,7 @@ try
 
     var appOptions = builder.Configuration.GetSection(AppOptions.App).Get<AppOptions>() ?? new AppOptions();
     var healthOptions = builder.Configuration.GetSection(HealthOptions.Health).Get<HealthOptions>() ?? new HealthOptions();
+
     Log.Information("{AppName} ver:{AppVersion}", appOptions.Name, appOptions.Version);
 
     // Add Authentication Services
@@ -79,18 +80,39 @@ try
 
     if (healthOptions.Enabled)
     {
-        builder.Services.AddHealthChecks()
-            .AddCheck<ClaimClientHealthCheck>("claim-api")
-            .AddCheck("self", () => HealthCheckResult.Healthy());
+        builder.Services.AddApplicationHealthChecks();
     }
 
-    if (healthOptions.Enabled && healthOptions.Port.HasValue)
+    builder.WebHost.ConfigureKestrel((context, options) =>
     {
-        builder.WebHost.ConfigureKestrel((context, options) =>
+        // Listen on App Port
+        if (appOptions.Uri != null)
+        {
+            if (string.Equals(appOptions.Uri.Host, "localhost", StringComparison.OrdinalIgnoreCase))
+            {
+                options.ListenLocalhost(appOptions.Uri.Port);
+            }
+            else if (IPAddress.TryParse(appOptions.Uri.Host, out var ip))
+            {
+                options.Listen(ip, appOptions.Uri.Port);
+            }
+            else
+            {
+                options.ListenAnyIP(appOptions.Uri.Port);
+            }
+        }
+        else
+        {
+            // Default port if no Url is configured
+            options.ListenAnyIP(AppOptions.DefaultPort);
+        }
+
+        // Listen on Health Port (9007)
+        if (healthOptions.Enabled && healthOptions.Port.HasValue)
         {
             options.ListenAnyIP(healthOptions.Port.Value);
-        });
-    }
+        }
+    });
 
     // MCP Server Setup
     builder.Services
@@ -109,37 +131,13 @@ try
 
     if (healthOptions.Enabled)
     {
-        // Liveness: Checks only "self"
-        var liveCheck = webapp.MapHealthChecks(healthOptions.LivePath, new HealthCheckOptions
-        {
-            Predicate = r => r.Name.Contains("self"),
-            ResponseWriter = HealthChecks.UI.Client.UIResponseWriter.WriteHealthCheckUIResponse
-        });
-
-        // Readiness: Checks everything
-        var readyCheck = webapp.MapHealthChecks(healthOptions.ReadyPath, new HealthCheckOptions
-        {
-            Predicate = _ => true,
-            ResponseWriter = HealthChecks.UI.Client.UIResponseWriter.WriteHealthCheckUIResponse
-        });
-
-        if (healthOptions.Port.HasValue)
-        {
-            liveCheck.RequireHost($"*:{healthOptions.Port}");
-            readyCheck.RequireHost($"*:{healthOptions.Port}");
-        }
+        webapp.MapApplicationHealthChecks(healthOptions);
     }
     webapp.MapMcp(appOptions.MapMcpPattern)
-        .RequireAuthorization(); // Protect the MCP endpoint
+        .RequireAuthorization() // Protect the MCP endpoint
+        .RequireHost($"*:{appOptions.Uri?.Port ?? AppOptions.DefaultPort}"); // Restrict to App Port
 
-    if (!string.IsNullOrWhiteSpace(appOptions.Url))
-    {
-        await webapp.RunAsync(appOptions.Url);
-    }
-    else
-    {
-        await webapp.RunAsync();
-    }
+    await webapp.RunAsync();
     return 0;
 }
 catch (Exception exc)

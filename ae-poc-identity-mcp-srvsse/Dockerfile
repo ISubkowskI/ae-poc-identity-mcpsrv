@@ -1,12 +1,10 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
-EXPOSE 8081
+EXPOSE 9007
 
 # Install curl for healthcheck
 USER root
@@ -34,5 +32,5 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8081/health/live || exit 1
+  CMD curl -f http://localhost:9007/health/live || exit 1
 ENTRYPOINT ["dotnet", "ae-poc-identity-mcp-srvsse.dll"]

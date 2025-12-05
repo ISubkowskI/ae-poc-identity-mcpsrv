@@ -35,7 +35,7 @@ public class HealthCheckIntegrationTests : IClassFixture<CustomWebApplicationFac
             .ReturnsAsync(new ClaimsInfo { TotalCount = 10 });
 
         // Act
-        var response = await client.GetAsync("http://localhost:8081/health/ready");
+        var response = await client.GetAsync("http://localhost:9007/health/ready");
 
         // Assert
         // Assert
@@ -56,7 +56,7 @@ public class HealthCheckIntegrationTests : IClassFixture<CustomWebApplicationFac
             .ThrowsAsync(new Exception("Backend down"));
 
         // Act
-        var response = await client.GetAsync("http://localhost:8081/health/ready");
+        var response = await client.GetAsync("http://localhost:9007/health/ready");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
@@ -76,7 +76,7 @@ public class HealthCheckIntegrationTests : IClassFixture<CustomWebApplicationFac
             .ReturnsAsync(new ClaimsInfo { TotalCount = 10 });
 
         // Act
-        var response = await client.GetAsync("http://localhost:8081/health/ready");
+        var response = await client.GetAsync("http://localhost:9007/health/ready");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -100,7 +100,7 @@ public class HealthCheckIntegrationTests : IClassFixture<CustomWebApplicationFac
         }).CreateClient();
 
         // Act
-        var response = await client.GetAsync("http://localhost:8081/health/ready");
+        var response = await client.GetAsync("http://localhost:9007/health/ready");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

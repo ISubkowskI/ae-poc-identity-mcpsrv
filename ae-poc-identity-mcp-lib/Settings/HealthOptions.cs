@@ -8,8 +8,6 @@ namespace Ae.Poc.Identity.Mcp.Settings
 
         public int? Port { get; set; }
 
-
-
         public string LivePath { get; set; } = "/health/live";
 
         public string ReadyPath { get; set; } = "/health/ready";
