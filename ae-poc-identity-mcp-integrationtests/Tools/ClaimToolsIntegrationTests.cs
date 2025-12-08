@@ -1,11 +1,6 @@
-using Ae.Poc.Identity.Mcp.Data;
 using Ae.Poc.Identity.Mcp.Dtos;
-using Ae.Poc.Identity.Mcp.Services;
 using Ae.Poc.Identity.Mcp.Tools;
-using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace Ae.Poc.Identity.Mcp.IntegrationTests.Tools;
 

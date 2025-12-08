@@ -2,7 +2,7 @@
 // IMPORTANT: Replace the placeholder below with the actual value of
 // "ExpectedToken" from your appsettings.json file.
 @token = YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME
-@mcpSessionId = l-M9Dw5T5FNWRHTG6b1WYA
+@mcpSessionId = dQ3JtU4AXSfsb8aciuvUvw
 ## 2025-03-26
 @mcpProtocolVersion = 2025-06-18
 
@@ -72,7 +72,7 @@ Authorization: Bearer {{token}}
   "params": {
     "name": "identity-get_claim_details",
     "arguments": {
-        "claimId": "22572c9f-1361-40ed-a8b0-6fb8be09782d"
+        "claimId": "486a3725-da3b-4468-8104-9a9facdf9937"
     }
   },
   "id": "msg-5"

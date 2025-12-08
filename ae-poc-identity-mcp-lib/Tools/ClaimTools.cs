@@ -65,7 +65,7 @@ Expected JSON structure:
             }
 
             _logger.LogInformation("Retrieving all claims");
-            var claims = await _claimClient.LoadClaimsAsync(claimsQuery, ct);
+            var claims = await _claimClient.LoadClaimsAsync(claimsQuery, ct).ConfigureAwait(false);
             if (claims == null)
             {
                 _logger.LogWarning("No claims found in the system");
@@ -82,7 +82,7 @@ Expected JSON structure:
             ClaimsOutgoingDto resDto = new ()
             {
                 Claims = res,
-                ClaimsInfo = (queryIncomingDto.WithClaimsInfo ?? false) ? _mapper.Map<ClaimsInfoOutgoingDto>(await _claimClient.GetClaimsInfoAsync(ct)) : null
+                ClaimsInfo = (queryIncomingDto.WithClaimsInfo ?? false) ? _mapper.Map<ClaimsInfoOutgoingDto>(await _claimClient.GetClaimsInfoAsync(ct).ConfigureAwait(false)) : null
             };
 
             _logger.LogInformation("Successfully retrieved {ClaimCount} claims", res.Count());
@@ -111,7 +111,7 @@ Expected JSON structure:
                 return ToolResultFactory.ValidationFailed<ClaimOutgoingDto>([errorMessage ?? "Unknown validation error"]);
             }
 
-            var claim = await _claimClient.LoadClaimDetailsAsync(claimId, ct);
+            var claim = await _claimClient.LoadClaimDetailsAsync(claimId, ct).ConfigureAwait(false);
             if (claim is null)
             {
                 return ToolResultFactory.Warning<ClaimOutgoingDto>("Claim not found");
@@ -143,7 +143,7 @@ Expected JSON structure:
                 return ToolResultFactory.ValidationFailed<ClaimOutgoingDto>([errorMessage ?? "Unknown validation error"]);
             }
 
-            var deletedClaim = await _claimClient.DeleteClaimAsync(claimId, ct);
+            var deletedClaim = await _claimClient.DeleteClaimAsync(claimId, ct).ConfigureAwait(false);
             var res = _mapper.Map<ClaimOutgoingDto>(deletedClaim);
             return ToolResultFactory.Success(res);
         }
@@ -181,7 +181,7 @@ Expected JSON structure:
             }
 
             var appClaim = _mapper.Map<AppClaim>(claimDto);
-            var createdClaim = await _claimClient.CreateClaimAsync(appClaim, ct);
+            var createdClaim = await _claimClient.CreateClaimAsync(appClaim, ct).ConfigureAwait(false);
             var res = _mapper.Map<ClaimOutgoingDto>(createdClaim);
             return ToolResultFactory.Success(res);
         }
@@ -232,7 +232,7 @@ Expected JSON structure:
             }
 
             var appClaim = _mapper.Map<AppClaim>(claimDto);
-            var updatedClaim = await _claimClient.UpdateClaimAsync(claimId, appClaim, ct);
+            var updatedClaim = await _claimClient.UpdateClaimAsync(claimId, appClaim, ct).ConfigureAwait(false);
             var res = _mapper.Map<ClaimOutgoingDto>(updatedClaim);
             return ToolResultFactory.Success(res);
         }

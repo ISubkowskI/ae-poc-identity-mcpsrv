@@ -1,7 +1,10 @@
 {
   "profiles": {
     "ae-poc-identity-mcp-srvsse": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     },
     "Container (Dockerfile)": {
       "commandName": "Docker"

@@ -29,5 +29,66 @@ graph TD
 ## Communicating with the backend REST API
 Before running the application, you need to ensure the required API service is running. Please start the `ae-sample-identity-webapi` service from the `sample-identity-jwt` repository. Refer to the instructions within the `sample-identity-jwt` repository to build and run the service.
 
+
 ## Testing the MCP Server
-You can use the provided `mcp-listen.http`, `requests.http` files to test the MCP server.
+You can use the provided `ae-poc-identity-mcp-srvsse/mcp-listen.http`, `ae-poc-identity-mcp-srvsse/mcp-requests.http` files to test the MCP server.
+
+## Health Checks
+You can manually check the health of the service using the provided `health.http` file.
+
+1. Open `ae-poc-identity-mcp-srvsse/health.http`.
+2. Ensure the application is running.
+3. Click "Send Request" above the `GET` request to verify the service status.
+
+### Kubernetes Configuration
+Configure your Liveness and Readiness probes as follows:
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: 9007
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: 9007
+  initialDelaySeconds: 5
+  periodSeconds: 10
+```
+
+## Running with Docker
+
+You can also run the MCP server using Docker.
+
+### Prerequisites
+- Docker installed and running.
+
+### Build the Image
+Navigate to the solution root directory and run:
+```bash
+docker build -t ae-poc-identity-mcp-srvsse -f ae-poc-identity-mcp-srvsse/Dockerfile .
+```
+
+### Run the Container
+Run the container, mapping port 8080 to a host port (e.g., 3001). You can override configuration settings using environment variables.
+
+```bash
+docker run --rm -p 3001:8080 -p 9007:9007 \
+  -e Authentication__ExpectedToken="YOUR_SECURE_TOKEN" \
+  -e IdentityStorageApi__ApiUrl="http://host.docker.internal:5023" \
+  ae-poc-identity-mcp-srvsse
+```
+
+> [!NOTE]
+> `host.docker.internal` is used to access services running on the host machine from within the container. Adjust the `IdentityStorageApi__ApiUrl` if your backend service is running elsewhere.
+
+### Configuration via Environment Variables
+You can override any setting in `appsettings.json` using environment variables with the double underscore `__` separator.
+- `Authentication__ExpectedToken`: The token required by the MCP client.
+- `IdentityStorageApi__ApiUrl`: The URL of the backend identity service (e.g. `http://0.0.0.0:5023`).
+- `App__Name`: The name of the MCP server application.
+- `App__Version`: The version of the MCP server application.
+- `App__Url`: The URL to bind the application to (e.g. `http://0.0.0.0:8080`).

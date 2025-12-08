@@ -79,6 +79,39 @@ public class ClaimToolsTests
     }
 
     [Fact]
+    public async Task GetClaimsAsync_ReturnsNullClaimsInfo_WhenWithClaimsInfoIsFalse()
+    {
+        // Arrange
+        ClaimsQuery claimsQuery = new()
+        {
+            Skipped = 0,
+            NumberOf = 10,
+        };
+        ClaimsQueryIncomingDto dto = new()
+        {
+            Skipped = 0,
+            NumberOf = 10,
+            WithClaimsInfo = false
+        };
+        var claims = new List<AppClaim> { new() { Id = Guid.NewGuid(), Type = "test" } };
+        var dtos = new List<ClaimOutgoingDto> { new() { Id = claims[0].Id, Type = "test" } };
+
+        ICollection<ValidationResult> validationResults = [];
+        _mockValidator.Setup(v => v.TryValidate(dto, out validationResults))
+            .Returns(true);
+        _mockClaimClient.Setup(c => c.LoadClaimsAsync(claimsQuery, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(claims);
+
+        // Act
+        var result = await _claimTools.GetClaimsAsync(dto);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value.ClaimsInfo.Should().BeNull();
+    }
+
+    [Fact]
     public async Task GetClaimsAsync_ReturnsError_OnException()
     {
         // Arrange

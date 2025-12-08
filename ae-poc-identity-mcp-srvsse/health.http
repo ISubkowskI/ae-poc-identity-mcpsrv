@@ -1,0 +1,9 @@
+@baseUrl = http://localhost:9007
+
+### Liveness Probe (Self)
+GET {{baseUrl}}/health/live
+Accept: application/json
+
+### Readiness Probe (Dependencies)
+GET {{baseUrl}}/health/ready
+Accept: application/json

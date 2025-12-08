@@ -1,14 +1,17 @@
 ﻿using Ae.Poc.Identity.Mcp.Authentication;
+using Ae.Poc.Identity.Mcp.Extensions;
 using Ae.Poc.Identity.Mcp.Profiles;
 using Ae.Poc.Identity.Mcp.Services;
 using Ae.Poc.Identity.Mcp.Settings;
+using Ae.Poc.Identity.Mcp.SrvSse.Services;
 using Ae.Poc.Identity.Mcp.Tools;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
+using System.Net;
 using System.Reflection;
 
 var logConfig = new LoggerConfiguration()
@@ -23,6 +26,14 @@ try
     var exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
     var builder = WebApplication.CreateBuilder(args);
+
+    // Explicitly configure configuration sources
+    builder.Configuration
+        .SetBasePath(builder.Environment.ContentRootPath)
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+        .AddEnvironmentVariables()
+        .AddCommandLine(args);
     builder.Services.AddSerilog((services, lc) => lc
         .ReadFrom.Configuration(builder.Configuration)
         .ReadFrom.Services(services)
@@ -30,6 +41,7 @@ try
 
     builder.Services
         .Configure<AppOptions>(builder.Configuration.GetSection(AppOptions.App))
+        .Configure<HealthOptions>(builder.Configuration.GetSection(HealthOptions.Health))
         .Configure<ServerAuthenticationOptions>(builder.Configuration.GetSection(ServerAuthenticationOptions.Authentication))
         .Configure<IdentityStorageApiOptions>(builder.Configuration.GetSection(IdentityStorageApiOptions.IdentityStorageApi));
 
@@ -52,6 +64,8 @@ try
         });
 
     var appOptions = builder.Configuration.GetSection(AppOptions.App).Get<AppOptions>() ?? new AppOptions();
+    var healthOptions = builder.Configuration.GetSection(HealthOptions.Health).Get<HealthOptions>() ?? new HealthOptions();
+
     Log.Information("{AppName} ver:{AppVersion}", appOptions.Name, appOptions.Version);
 
     // Add Authentication Services
@@ -64,9 +78,41 @@ try
         });
     builder.Services.AddAuthorization();
 
-    //builder.Services.AddHealthChecks()
-    //    .AddCheck<ClaimClientHealthCheck>("claim-api")
-    //    .AddCheck("self", () => HealthCheckResult.Healthy());
+    if (healthOptions.Enabled)
+    {
+        builder.Services.AddApplicationHealthChecks();
+    }
+
+    builder.WebHost.ConfigureKestrel((context, options) =>
+    {
+        // Listen on App Port
+        if (appOptions.Uri != null)
+        {
+            if (string.Equals(appOptions.Uri.Host, "localhost", StringComparison.OrdinalIgnoreCase))
+            {
+                options.ListenLocalhost(appOptions.Uri.Port);
+            }
+            else if (IPAddress.TryParse(appOptions.Uri.Host, out var ip))
+            {
+                options.Listen(ip, appOptions.Uri.Port);
+            }
+            else
+            {
+                options.ListenAnyIP(appOptions.Uri.Port);
+            }
+        }
+        else
+        {
+            // Default port if no Url is configured
+            options.ListenAnyIP(AppOptions.DefaultPort);
+        }
+
+        // Listen on Health Port (9007)
+        if (healthOptions.Enabled && healthOptions.Port.HasValue)
+        {
+            options.ListenAnyIP(healthOptions.Port.Value);
+        }
+    });
 
     // MCP Server Setup
     builder.Services
@@ -82,11 +128,16 @@ try
     var webapp = builder.Build();
     webapp.UseAuthentication();
     webapp.UseAuthorization();
-    //webapp.MapHealthChecks("/health");
-    webapp.MapMcp(appOptions.MapMcpPattern)
-        .RequireAuthorization(); // Protect the MCP endpoint
 
-    await webapp.RunAsync(appOptions.Url);
+    if (healthOptions.Enabled)
+    {
+        webapp.MapApplicationHealthChecks(healthOptions);
+    }
+    webapp.MapMcp(appOptions.MapMcpPattern)
+        .RequireAuthorization() // Protect the MCP endpoint
+        .RequireHost($"*:{appOptions.Uri?.Port ?? AppOptions.DefaultPort}"); // Restrict to App Port
+
+    await webapp.RunAsync();
     return 0;
 }
 catch (Exception exc)
