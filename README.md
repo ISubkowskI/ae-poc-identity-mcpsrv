@@ -6,7 +6,12 @@ This application communicates with a backend REST Web API to function.
 
 ## Architecture Overview
 
-The solution consists of three main components: the external client application (implemented MCP client), the MCP server (this project), and a backend service (REST API) for identity management. The MCP server acts as an intermediary layer, processing client requests and communicating with the backend API for tasks such as authentication.
+The solution consists of three main components:
+1. **External Client Application**: Consumes the MCP server.
+2. **MCP Server (this project)**: Acts as an intermediary, processing MCP requests over SSE and communicating with the backend API.
+3. **Backend Service (REST API)**: Manages identity data.
+
+Additionally, the MCP server exposes dedicated endpoints for Health Checks and Kubernetes Probes on a separate port.
 
 ```mermaid
 graph TD
@@ -15,15 +20,21 @@ graph TD
     end
 
     subgraph "MCP Server (this repository)"
-        lblMCPServer["MCP Server SSE transport<br/>(Implements MCP)"]
+        lblMCPServer["MCP Server SSE transport<br/>(Implements MCP)<br/>Port: 8080 (default)"]
+        lblHealth["Health Checks / K8s Probes<br/>Port: 9007"]
     end
 
     subgraph "Backend Service (REST API)"
         lblBackendService["External repository<br/>sample-identity-jwt<br/>ae-sample-identity-webapi.csproj"]
     end
+    
+    subgraph "Kubernetes / Monitoring"
+        lblK8s["Liveness / Readiness Probes"]
+    end
 
-    lblMCPClient -- "MCP over SSE (http://localhost:3001/identity/mcp)" <--> lblMCPServer
-    lblMCPServer -- "HTTP/REST (http://localhost:5023/api/v1/masterdata/claims)" <--> lblBackendService
+    lblMCPClient -- "MCP over SSE (http://host:8080/identity/mcp)" <--> lblMCPServer
+    lblMCPServer -- "HTTP/REST (http://host:5023/api/v1/...)" <--> lblBackendService
+    lblK8s -- "HTTP GET (http://host:9007/...)" --> lblHealth
 ```
 
 ## Communicating with the backend REST API
