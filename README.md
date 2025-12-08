@@ -31,7 +31,7 @@ Before running the application, you need to ensure the required API service is r
 
 
 ## Testing the MCP Server
-You can use the provided `ae-poc-identity-mcp-srvsse/mcp-listen.http`, `ae-poc-identity-mcp-srvsse/requests.http` files to test the MCP server.
+You can use the provided `ae-poc-identity-mcp-srvsse/mcp-listen.http`, `ae-poc-identity-mcp-srvsse/mcp-requests.http` files to test the MCP server.
 
 ## Health Checks
 You can manually check the health of the service using the provided `health.http` file.
@@ -88,4 +88,7 @@ docker run --rm -p 3001:8080 -p 9007:9007 \
 ### Configuration via Environment Variables
 You can override any setting in `appsettings.json` using environment variables with the double underscore `__` separator.
 - `Authentication__ExpectedToken`: The token required by the MCP client.
-- `IdentityStorageApi__ApiUrl`: The URL of the backend identity service.
+- `IdentityStorageApi__ApiUrl`: The URL of the backend identity service (e.g. `http://0.0.0.0:5023`).
+- `App__Name`: The name of the MCP server application.
+- `App__Version`: The version of the MCP server application.
+- `App__Url`: The URL to bind the application to (e.g. `http://0.0.0.0:8080`).

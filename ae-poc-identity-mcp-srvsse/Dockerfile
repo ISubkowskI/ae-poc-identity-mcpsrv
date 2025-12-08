@@ -17,6 +17,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["ae-poc-identity-mcp-srvsse/ae-poc-identity-mcp-srvsse.csproj", "ae-poc-identity-mcp-srvsse/"]
+COPY ["ae-poc-identity-mcp-lib/ae-poc-identity-mcp-lib.csproj", "ae-poc-identity-mcp-lib/"]
 RUN dotnet restore "./ae-poc-identity-mcp-srvsse/ae-poc-identity-mcp-srvsse.csproj"
 COPY . .
 WORKDIR "/src/ae-poc-identity-mcp-srvsse"
