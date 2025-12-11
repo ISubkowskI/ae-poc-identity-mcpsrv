@@ -3,7 +3,6 @@ using Ae.Poc.Identity.Mcp.Extensions;
 using Ae.Poc.Identity.Mcp.Profiles;
 using Ae.Poc.Identity.Mcp.Services;
 using Ae.Poc.Identity.Mcp.Settings;
-using Ae.Poc.Identity.Mcp.SrvSse.Services;
 using Ae.Poc.Identity.Mcp.Tools;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -14,6 +13,9 @@ using Serilog;
 using System.Net;
 using System.Reflection;
 
+
+const string ConfigBaseName = "mcpsrvidentitysettings";
+
 var logConfig = new LoggerConfiguration()
     .MinimumLevel.Verbose()
     .WriteTo.Console(standardErrorFromLevel: Serilog.Events.LogEventLevel.Verbose);
@@ -21,19 +23,51 @@ Log.Logger = logConfig.CreateBootstrapLogger();
 
 try
 {
-    Log.Debug("App starting ... '{Env}'", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? string.Empty);
+    Log.Information("App starting ... '{Env}'", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? string.Empty);
     Log.Debug("Working directory: '{CurrentDirectory}'", Environment.CurrentDirectory);
     var exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
     var builder = WebApplication.CreateBuilder(args);
+    Log.Verbose("Content Root Path: '{ContentRootPath}'", builder.Environment.ContentRootPath);
+    Log.Verbose("Directory Current: '{GetCurrentDirectory}'", Directory.GetCurrentDirectory());
+    Log.Verbose("Builder Env: '{BuilderEnv}'", builder.Environment.EnvironmentName);
 
-    // Explicitly configure configuration sources
+    // Determine external config directory from command-line, environment variable, or default location
+    // Priority: 1) --configpath=  2) CONFIG_PATH environment variable  3) default current directory
+    string? configDir = null;
+    try
+    {
+        configDir = args?.FirstOrDefault(a => a.StartsWith("--configpath=", StringComparison.OrdinalIgnoreCase))?.Split('=', 2)[1];
+    }
+    catch { /* ignore parse errors */ }
+
+    configDir ??= Environment.GetEnvironmentVariable("CONFIG_PATH");
+
+    if (string.IsNullOrWhiteSpace(configDir))
+    {
+        configDir = builder.Environment.ContentRootPath ?? Directory.GetCurrentDirectory();
+        Log.Debug("No external config directory provided via --configpath or CONFIG_PATH, using default");
+    }
+
+    Log.Information("Configuration use folder: {ConfigDir}", configDir);
+
+    // Validate config directory exists
+    if (!Directory.Exists(configDir))
+    {
+        Log.Fatal("Required configuration directory was not found: {ConfigDir}", configDir);
+        return 2;
+    }
+   
+    // Explicitly configure configuration sources from external directory
     builder.Configuration
-        .SetBasePath(builder.Environment.ContentRootPath)
-        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
-        .AddEnvironmentVariables()
-        .AddCommandLine(args);
+        .SetBasePath(configDir)
+        .AddJsonFile(ConfigBaseName + ".json", optional: false, reloadOnChange: true)
+        .AddJsonFile($"{ConfigBaseName}.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+
+    // Add environment variables and command line arguments last so they can override file settings
+    builder.Configuration.AddEnvironmentVariables();
+    builder.Configuration.AddCommandLine(args);
+
     builder.Services.AddSerilog((services, lc) => lc
         .ReadFrom.Configuration(builder.Configuration)
         .ReadFrom.Services(services)

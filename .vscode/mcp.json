@@ -1,13 +1,13 @@
 {
 	"servers": {
-		"my-mcp-server-e4582342": {
-			"url": "http://localhost:3001/identity/mcp",
+		"ae-identity-claims": {
+			"url": "http://localhost:3001/mcp/v1/claims/sse",
 			"type": "sse",
 			"auth": {
 				"type": "bearer",
-				"token": "YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME"
+				"token": "REPLACE_WITH_YOUR_TOKEN_IN_MCP_LOCAL_JSON"
 			}
 		}
 	},
-	"inputs": []
+	"inputs": []y
 }

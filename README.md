@@ -103,3 +103,33 @@ You can override any setting in `appsettings.json` using environment variables w
 - `App__Name`: The name of the MCP server application.
 - `App__Version`: The version of the MCP server application.
 - `App__Url`: The URL to bind the application to (e.g. `http://0.0.0.0:8080`).
+
+## VS Code Agent Setup
+
+This repository includes configuration files to help you connect the VS Code Agent to this MCP server.
+
+### 1. Base Configuration (`.vscode/mcp.json`)
+The `.vscode/mcp.json` file is pre-configured with the default local URL (`http://localhost:8080/mcp/v1/claims/sse`) and SSE transport settings. This file is committed to the repository.
+
+### 2. Local Secrets (`.vscode/mcp.local.json`)
+The `.vscode/mcp.local.json` file is used for local overrides and is **git-ignored** to prevent leaking secrets. You must create this file manually if it does not exist.
+
+**Steps to configure:**
+
+1.  Create a file named `mcp.local.json` in the `.vscode/` directory.
+2.  Add the following content, replacing the token with your actual secret (matching `Authentication:ExpectedToken` in your app settings):
+
+```json
+{
+    "servers": {
+        "ae-identity-claims": {
+            "url": "http://localhost:8080/mcp/v1/claims/sse",
+            "auth": {
+                "token": "my-secret-token"
+            }
+        }
+    }
+}
+```
+
+3.  Restart the VS Code Agent or reload the window to apply the changes.

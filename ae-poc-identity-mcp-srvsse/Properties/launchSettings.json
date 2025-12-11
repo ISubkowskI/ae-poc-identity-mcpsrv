@@ -3,7 +3,8 @@
     "ae-poc-identity-mcp-srvsse": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        //"CONFIG_PATH": "config"
       }
     },
     "Container (Dockerfile)": {
