@@ -16,7 +16,7 @@
   },
   "App": {
     "Name": "Claims MCP Server 'SSE'",
-    "Version": "2.0.5",
+    "Version": "2.0.6",
     "Url": "",
     "MapMcpPattern": "/mcp/v1/claims"
   },
