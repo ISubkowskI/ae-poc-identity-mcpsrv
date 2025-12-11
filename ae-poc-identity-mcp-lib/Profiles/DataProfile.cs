@@ -1,7 +1,6 @@
 ﻿using Ae.Poc.Identity.Mcp.Data;
 using Ae.Poc.Identity.Mcp.Dtos;
 using AutoMapper;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ae.Poc.Identity.Mcp.Profiles;
 
@@ -20,6 +19,7 @@ public sealed class DataProfile : Profile
     public DataProfile()
     {
         CreateMap<AppClaim, ClaimOutgoingDto>();
+        CreateMap<AppClaim, ClaimDto>();
         CreateMap<ClaimsInfo, ClaimsInfoOutgoingDto>();
         CreateMap<ClaimCreateDto, AppClaim>()
             .ForMember(dest => dest.Id, opt => opt.Ignore());

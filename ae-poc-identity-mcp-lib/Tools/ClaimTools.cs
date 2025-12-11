@@ -169,18 +169,18 @@ Expected JSON structure:
   ""DisplayText"": ""string"",
   ""Properties"": { ""key1"": ""value1"", ... } (optional),
   ""Description"": ""string"" (optional, max 500 chars)
-}")] ClaimCreateDto claimDto,
+}")] ClaimCreateDto claimCreateDto,
         CancellationToken ct = default)
     {
         try
         {
-            if (!_validator.TryValidate(claimDto, out var validationResults))
+            if (!_validator.TryValidate(claimCreateDto, out var validationResults))
             {
                 var errors = validationResults.Select(r => r.ErrorMessage ?? "Unknown validation error").ToArray();
                 return ToolResultFactory.ValidationFailed<ClaimOutgoingDto>(errors);
             }
 
-            var appClaim = _mapper.Map<AppClaim>(claimDto);
+            var appClaim = _mapper.Map<AppClaim>(claimCreateDto);
             var createdClaim = await _claimClient.CreateClaimAsync(appClaim, ct).ConfigureAwait(false);
             var res = _mapper.Map<ClaimOutgoingDto>(createdClaim);
             return ToolResultFactory.Success(res);
@@ -209,7 +209,7 @@ Expected JSON structure:
   ""DisplayText"": ""string"",
   ""Properties"": { ""key1"": ""value1"", ... } (optional),
   ""Description"": ""string"" (optional, max 500 chars)
-}")] ClaimUpdateDto claimDto,
+}")] ClaimUpdateDto claimUpdateDto,
         CancellationToken ct = default)
     {
         try
@@ -220,18 +220,18 @@ Expected JSON structure:
             }
 
             // Compare claimId with claimDto.Id
-            if (parsedClaimId != claimDto.Id)
+            if (parsedClaimId != claimUpdateDto.Id)
             {
                 return ToolResultFactory.ValidationFailed<ClaimOutgoingDto>(["The claimId path parameter must match the Id field in the request body."]);
             }
 
-            if (!_validator.TryValidate(claimDto, out var validationResults))
+            if (!_validator.TryValidate(claimUpdateDto, out var validationResults))
             {
                 var errors = validationResults.Select(r => r.ErrorMessage ?? "Unknown validation error").ToArray();
                 return ToolResultFactory.ValidationFailed<ClaimOutgoingDto>(errors);
             }
 
-            var appClaim = _mapper.Map<AppClaim>(claimDto);
+            var appClaim = _mapper.Map<AppClaim>(claimUpdateDto);
             var updatedClaim = await _claimClient.UpdateClaimAsync(claimId, appClaim, ct).ConfigureAwait(false);
             var res = _mapper.Map<ClaimOutgoingDto>(updatedClaim);
             return ToolResultFactory.Success(res);

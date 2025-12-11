@@ -131,8 +131,8 @@ The `.vscode/mcp.local.json` file is used for local overrides and is **git-ignor
     "servers": {
         "ae-identity-claims": {
             "url": "http://localhost:8080/mcp/v1/claims/sse",
-            "auth": {
-                "token": "my-secret-token"
+            "headers": {
+                "Authorization": "Bearer my-secret-token"
             }
         }
     }

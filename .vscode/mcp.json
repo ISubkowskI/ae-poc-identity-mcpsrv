@@ -3,11 +3,10 @@
 		"ae-identity-claims": {
 			"url": "http://localhost:3001/mcp/v1/claims/sse",
 			"type": "sse",
-			"auth": {
-				"type": "bearer",
-				"token": "REPLACE_WITH_YOUR_TOKEN_IN_MCP_LOCAL_JSON"
+			"headers": {
+				"Authorization": "Bearer YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME"
 			}
 		}
 	},
-	"inputs": []y
+	"inputs": []
 }
