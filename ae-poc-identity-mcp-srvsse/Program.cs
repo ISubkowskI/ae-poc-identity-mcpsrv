@@ -28,35 +28,20 @@ try
     var exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
     var builder = WebApplication.CreateBuilder(args);
-    Log.Verbose("Content Root Path: '{ContentRootPath}'", builder.Environment.ContentRootPath);
-    Log.Verbose("Directory Current: '{GetCurrentDirectory}'", Directory.GetCurrentDirectory());
-    Log.Verbose("Builder Env: '{BuilderEnv}'", builder.Environment.EnvironmentName);
+    Log.Verbose("\n    Content Root Path: '{ContentRootPath}'\n    Directory Current: '{GetCurrentDirectory}'\n    Builder Env: '{BuilderEnv}'",
+        builder.Environment.ContentRootPath, Directory.GetCurrentDirectory(), builder.Environment.EnvironmentName);
+    //Log.Verbose("Directory Current: '{GetCurrentDirectory}'", Directory.GetCurrentDirectory());
+    //Log.Verbose("Builder Env: '{BuilderEnv}'", builder.Environment.EnvironmentName);
 
     // Determine external config directory from command-line, environment variable, or default location
     // Priority: 1) --configpath=  2) CONFIG_PATH environment variable  3) default current directory
-    string? configDir = null;
-    try
-    {
-        configDir = args?.FirstOrDefault(a => a.StartsWith("--configpath=", StringComparison.OrdinalIgnoreCase))?.Split('=', 2)[1];
-    }
-    catch { /* ignore parse errors */ }
-
-    configDir ??= Environment.GetEnvironmentVariable("CONFIG_PATH");
-
-    if (string.IsNullOrWhiteSpace(configDir))
-    {
-        configDir = builder.Environment.ContentRootPath ?? Directory.GetCurrentDirectory();
-        Log.Debug("No external config directory provided via --configpath or CONFIG_PATH, using default");
-    }
-
-    Log.Information("Configuration use folder: {ConfigDir}", configDir);
-
-    // Validate config directory exists
+    string configDir = ConfigurationHelper.ResolveConfigDirectory(args, builder.Environment.ContentRootPath ?? Directory.GetCurrentDirectory());
     if (!Directory.Exists(configDir))
     {
         Log.Fatal("Required configuration directory was not found: {ConfigDir}", configDir);
         return 2;
     }
+    Log.Information("Configuration use folder: {ConfigDir}", configDir);
    
     // Explicitly configure configuration sources from external directory
     builder.Configuration

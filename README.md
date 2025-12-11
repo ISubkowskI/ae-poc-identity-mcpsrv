@@ -104,6 +104,13 @@ You can override any setting in `appsettings.json` using environment variables w
 - `App__Version`: The version of the MCP server application.
 - `App__Url`: The URL to bind the application to (e.g. `http://0.0.0.0:8080`).
 
+### Configuration Path
+The application loads configuration (`mcpsrvidentitysettings.json`) from the current working directory by default. You can override this location using:
+1.  **Command Line Argument**: `--configpath=/path/to/config`
+2.  **Environment Variable**: `CONFIG_PATH=/path/to/config`
+
+The application supports relative paths (e.g., `--configpath=.` or `--configpath=../config`). It resolves them relative to the current working directory first, and then falls back to the executable's directory if the path is not found.
+
 ## VS Code Agent Setup
 
 This repository includes configuration files to help you connect the VS Code Agent to this MCP server.
