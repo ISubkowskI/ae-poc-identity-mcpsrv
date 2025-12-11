@@ -30,8 +30,6 @@ try
     var builder = WebApplication.CreateBuilder(args);
     Log.Verbose("\n    Content Root Path: '{ContentRootPath}'\n    Directory Current: '{GetCurrentDirectory}'\n    Builder Env: '{BuilderEnv}'",
         builder.Environment.ContentRootPath, Directory.GetCurrentDirectory(), builder.Environment.EnvironmentName);
-    //Log.Verbose("Directory Current: '{GetCurrentDirectory}'", Directory.GetCurrentDirectory());
-    //Log.Verbose("Builder Env: '{BuilderEnv}'", builder.Environment.EnvironmentName);
 
     // Determine external config directory from command-line, environment variable, or default location
     // Priority: 1) --configpath=  2) CONFIG_PATH environment variable  3) default current directory
@@ -44,6 +42,7 @@ try
     Log.Information("Configuration use folder: {ConfigDir}", configDir);
    
     // Explicitly configure configuration sources from external directory
+    builder.Configuration.Sources.Clear();
     builder.Configuration
         .SetBasePath(configDir)
         .AddJsonFile(ConfigBaseName + ".json", optional: false, reloadOnChange: true)
