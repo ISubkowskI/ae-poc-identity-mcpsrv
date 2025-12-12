@@ -16,7 +16,7 @@ Additionally, the MCP server exposes dedicated endpoints for Health Checks and K
 ```mermaid
 graph TD
     subgraph "External Client Application"
-        lblMCPClient["MCP Client<br/>(Authentication via Token)"]
+        lblMCPClient["MCP Client<br/>(VS Code AgentAuthentication via Token)"]
     end
 
     subgraph "MCP Server (this repository)"
@@ -32,9 +32,9 @@ graph TD
         lblK8s["Liveness / Readiness Probes"]
     end
 
-    lblMCPClient -- "MCP over SSE (http://host:8080/identity/mcp)" <--> lblMCPServer
+    lblMCPClient -- "MCP over SSE (http://host:8080/mcp/v1/...)" <--> lblMCPServer
     lblMCPServer -- "HTTP/REST (http://host:5023/api/v1/...)" <--> lblBackendService
-    lblK8s -- "HTTP GET (http://host:9007/...)" --> lblHealth
+    lblK8s -- "HTTP GET (http://host:9007/health/...)" --> lblHealth
 ```
 
 ## Communicating with the backend REST API
@@ -97,7 +97,7 @@ docker run --rm -p 3001:8080 -p 9007:9007 \
 > `host.docker.internal` is used to access services running on the host machine from within the container. Adjust the `IdentityStorageApi__ApiUrl` if your backend service is running elsewhere.
 
 ### Configuration via Environment Variables
-You can override any setting in `appsettings.json` using environment variables with the double underscore `__` separator.
+You can override any setting in `mcpsrvidentitysettings.json` using environment variables with the double underscore `__` separator.
 - `Authentication__ExpectedToken`: The token required by the MCP client.
 - `IdentityStorageApi__ApiUrl`: The URL of the backend identity service (e.g. `http://0.0.0.0:5023`).
 - `App__Name`: The name of the MCP server application.
