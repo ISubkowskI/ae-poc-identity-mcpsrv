@@ -357,4 +357,4 @@ MigrationBackup/
 /dist
 
 # Local MCP client auth - keep tokens out of source control
-.vscode/mcp.local.json
+.vscode/mcp.json
