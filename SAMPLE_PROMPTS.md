@@ -13,7 +13,7 @@ This content describes how to interact with the `ae-identity-claims` MCP server 
 ## 2. Listing Claims
 
 **Prompt:**
-> "List the first 20 identity claims."
+> "List the first 10 identity claims."
 
 *Tool Used:* `identity-get_claims`
 *Arguments:* 
@@ -28,7 +28,7 @@ This content describes how to interact with the `ae-identity-claims` MCP server 
 
 **Prompt:**
 > "Fetch all claims and show me their details."
-> "Fetch all claims and show me their DisplayText and IDs."
+> "Fetch all claims and show me their DisplayText and IDs. Format as table. Add sequence number as first column."
 
 *Tool Used:* `identity-get_claims`
 *Arguments:* 
@@ -44,7 +44,7 @@ This content describes how to interact with the `ae-identity-claims` MCP server 
 ## 3. Retrieving Claim Details
 
 **Prompt:**
-> "Get details for the claim with ID `f03af1bf-17d4-455d-9237-bf53fdd2eab6`."
+> "Get details for the claim with ID `5a9f467e-24a3-48e5-a4fc-46edefbcfdd4`."
 
 *Tool Used:* `identity-get_claim_details`
 *Arguments:* `claimId`
@@ -53,6 +53,7 @@ This content describes how to interact with the `ae-identity-claims` MCP server 
 
 **Prompt:**
 > "Create a new role claim. The type should be `role`, value `Administrator2`, value type `string`, and display text `Admin Role2`, description `Administrator2 role with full permissions`."
+> Get details for the claim with DisplayText `Admin Role2`.
 
 *Tool Used:* `identity-create_claim`
 *Arguments:*
@@ -71,7 +72,7 @@ This content describes how to interact with the `ae-identity-claims` MCP server 
 ## 5. Updating a Claim
 
 **Prompt:**
-> "Update the claim `486a3725-...` to have the display text 'Super Admin'."
+> "Update the claim `4603f985-...` to have the display text 'Super Admin Role2'."
 
 *Tool Used:* `identity-update_claim`
 *Arguments:* `claimId`, `claimDto` (typically requires fetching the claim first to get the current state, or providing the full object).
@@ -79,7 +80,7 @@ This content describes how to interact with the `ae-identity-claims` MCP server 
 ## 6. Deleting a Claim
 
 **Prompt:**
-> "Delete the claim with ID `486a3725-...`."
+> "Delete the claim with ID `893f172e-250c-4c19-a0c9-376445f65670`."
 
 *Tool Used:* `identity-delete_claim`
 *Arguments:* `claimId`

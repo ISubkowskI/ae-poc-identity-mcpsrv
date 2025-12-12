@@ -113,29 +113,29 @@ The application supports relative paths (e.g., `--configpath=.` or `--configpath
 
 ## VS Code Agent Setup
 
-This repository includes configuration files to help you connect the VS Code Agent to this MCP server.
+This repository includes a template configuration file to help you connect the VS Code Agent to this MCP server.
 
-### 1. Base Configuration (`.vscode/mcp.json`)
-The `.vscode/mcp.json` file is pre-configured with the default local URL (`http://localhost:8080/mcp/v1/claims/sse`) and SSE transport settings. This file is committed to the repository.
+### Configuration (`.vscode/mcp.json`)
 
-### 2. Local Secrets (`.vscode/mcp.local.json`)
-The `.vscode/mcp.local.json` file is used for local overrides and is **git-ignored** to prevent leaking secrets. You must create this file manually if it does not exist.
+The configuration should be placed in `.vscode/mcp.json`. This file is **git-ignored** to prevent leaking secrets.
 
 **Steps to configure:**
 
-1.  Create a file named `mcp.local.json` in the `.vscode/` directory.
-2.  Add the following content, replacing the token with your actual secret (matching `Authentication:ExpectedToken` in your app settings):
+1.  Copy `.vscode/mcp.template.json` to `.vscode/mcp.json` if it does not exist.
+2.  Open `.vscode/mcp.json` and replace the placeholder token with your actual secret (matching `Authentication:ExpectedToken` in your app settings):
 
 ```json
 {
     "servers": {
         "ae-identity-claims": {
             "url": "http://localhost:8080/mcp/v1/claims/sse",
+            "type": "sse",
             "headers": {
                 "Authorization": "Bearer my-secret-token"
             }
         }
-    }
+    },
+    "inputs": []
 }
 ```
 
