@@ -72,7 +72,8 @@ This content describes how to interact with the `ae-identity-claims` MCP server 
 ## 5. Updating a Claim
 
 **Prompt:**
-> "Update the claim `4603f985-...` to have the display text 'Super Admin Role2'."
+> "Update the claim `8d03f9ba-590c-4b71-9e99-3754f0e7cb47` to have the display text 'Super Admin Role2'."
+> "Update the claim `Super Admin Role2` to have the display text 'Super Admin Role200'."
 
 *Tool Used:* `identity-update_claim`
 *Arguments:* `claimId`, `claimDto` (typically requires fetching the claim first to get the current state, or providing the full object).

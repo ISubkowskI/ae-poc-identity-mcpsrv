@@ -8,7 +8,7 @@ EXPOSE 9007
 
 # Install curl for healthcheck
 USER root
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y curl --no-install-recommends && rm -rf /var/lib/apt/lists/*
 USER $APP_UID
 
 
