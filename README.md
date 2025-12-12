@@ -16,7 +16,7 @@ Additionally, the MCP server exposes dedicated endpoints for Health Checks and K
 ```mermaid
 graph TD
     subgraph "External Client Application"
-        lblMCPClient["MCP Client<br/>(VS Code AgentAuthentication via Token)"]
+        lblMCPClient["MCP Client<br/>(VS Code Agent)<br/>(Authentication via Token)"]
     end
 
     subgraph "MCP Server (this repository)"
