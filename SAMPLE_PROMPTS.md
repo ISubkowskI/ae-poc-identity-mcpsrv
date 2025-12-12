@@ -5,7 +5,9 @@ This content describes how to interact with the `ae-identity-claims` MCP server 
 ## 1. System Information
 
 **Prompt:**
-> "What version of the identity claims server is currently running?"
+```text
+What version of the identity claims server is currently running?
+```
 
 *Tool Used:* `general-get_app_version`
 *Description:* Retrieves the application name, version, and server time.
@@ -13,7 +15,9 @@ This content describes how to interact with the `ae-identity-claims` MCP server 
 ## 2. Listing Claims
 
 **Prompt:**
-> "List the first 10 identity claims."
+```text
+List the first 10 identity claims.
+```
 
 *Tool Used:* `identity-get_claims`
 *Arguments:* 
@@ -27,8 +31,13 @@ This content describes how to interact with the `ae-identity-claims` MCP server 
 ```
 
 **Prompt:**
-> "Fetch all claims and show me their details."
-> "Fetch all claims and show me their DisplayText and IDs. Format as table. Add sequence number as first column."
+```text
+Fetch all claims and show me their details.
+```
+
+```text
+Fetch all claims and show me their DisplayText and IDs. Format as table. Add sequence number as first column.
+```
 
 *Tool Used:* `identity-get_claims`
 *Arguments:* 
@@ -44,7 +53,9 @@ This content describes how to interact with the `ae-identity-claims` MCP server 
 ## 3. Retrieving Claim Details
 
 **Prompt:**
-> "Get details for the claim with ID `5a9f467e-24a3-48e5-a4fc-46edefbcfdd4`."
+```text
+Get details for the claim with ID `5a9f467e-24a3-48e5-a4fc-46edefbcfdd4`.
+```
 
 *Tool Used:* `identity-get_claim_details`
 *Arguments:* `claimId`
@@ -52,8 +63,13 @@ This content describes how to interact with the `ae-identity-claims` MCP server 
 ## 4. Creating a Claim
 
 **Prompt:**
-> "Create a new role claim. The type should be `role`, value `Administrator2`, value type `string`, and display text `Admin Role2`, description `Administrator2 role with full permissions`."
-> Get details for the claim with DisplayText `Admin Role2`.
+```text
+Create a new role claim. The type should be `role`, value `Administrator2`, value type `string`, and display text `Admin Role2`, description `Administrator2 role with full permissions`.
+```
+
+```text
+Get details for the claim with DisplayText `Admin Role2`.
+```
 
 *Tool Used:* `identity-create_claim`
 *Arguments:*
@@ -72,8 +88,13 @@ This content describes how to interact with the `ae-identity-claims` MCP server 
 ## 5. Updating a Claim
 
 **Prompt:**
-> "Update the claim `8d03f9ba-590c-4b71-9e99-3754f0e7cb47` to have the display text 'Super Admin Role2'."
-> "Update the claim `Super Admin Role2` to have the display text 'Super Admin Role200'."
+```text
+Update the claim `8d03f9ba-590c-4b71-9e99-3754f0e7cb47` to have the display text 'Super Admin Role2'.
+```
+
+```text
+Update the claim `Super Admin Role2` to have the display text 'Super Admin Role200'.
+```
 
 *Tool Used:* `identity-update_claim`
 *Arguments:* `claimId`, `claimDto` (typically requires fetching the claim first to get the current state, or providing the full object).
@@ -81,7 +102,9 @@ This content describes how to interact with the `ae-identity-claims` MCP server 
 ## 6. Deleting a Claim
 
 **Prompt:**
-> "Delete the claim with ID `893f172e-250c-4c19-a0c9-376445f65670`."
+```text
+Delete the claim with ID `893f172e-250c-4c19-a0c9-376445f65670`.
+```
 
 *Tool Used:* `identity-delete_claim`
 *Arguments:* `claimId`
