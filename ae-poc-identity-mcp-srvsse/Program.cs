@@ -152,8 +152,7 @@ try
         webapp.MapApplicationHealthChecks(healthOptions);
     }
     webapp.MapMcp(appOptions.MapMcpPattern)
-        .RequireAuthorization() // Protect the MCP endpoint
-        .RequireHost($"*:{appOptions.Uri?.Port ?? AppOptions.DefaultPort}"); // Restrict to App Port
+        .RequireAuthorization(); // Protect the MCP endpoint
 
     await webapp.RunAsync();
     return 0;
