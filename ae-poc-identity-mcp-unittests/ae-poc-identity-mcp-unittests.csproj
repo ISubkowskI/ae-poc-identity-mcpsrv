@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ae-poc-identity-mcp-lib\ae-poc-identity-mcp-lib.csproj" />
+    <ProjectReference Include="..\ae-poc-identity-mcp-srvsse\ae-poc-identity-mcp-srvsse.csproj" />
   </ItemGroup>
 
 </Project>

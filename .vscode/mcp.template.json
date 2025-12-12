@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "ae-identity-claims": {
+      "url": "http://localhost:8080/mcp/v1/claims/sse",
+      "type": "sse",
+      "headers": {
+        "Authorization": "Bearer REPLACE_WITH_YOUR_TOKEN_IN_MCP_JSON"
+      }
+    }
+  },
+  "inputs": []
+}

@@ -103,3 +103,40 @@ You can override any setting in `appsettings.json` using environment variables w
 - `App__Name`: The name of the MCP server application.
 - `App__Version`: The version of the MCP server application.
 - `App__Url`: The URL to bind the application to (e.g. `http://0.0.0.0:8080`).
+
+### Configuration Path
+The application loads configuration (`mcpsrvidentitysettings.json`) from the current working directory by default. You can override this location using:
+1.  **Command Line Argument**: `--configpath=/path/to/config`
+2.  **Environment Variable**: `CONFIG_PATH=/path/to/config`
+
+The application supports relative paths (e.g., `--configpath=.` or `--configpath=../config`). It resolves them relative to the current working directory first, and then falls back to the executable's directory if the path is not found.
+
+## VS Code Agent Setup
+
+This repository includes a template configuration file to help you connect the VS Code Agent to this MCP server.
+
+### Configuration (`.vscode/mcp.json`)
+
+The configuration should be placed in `.vscode/mcp.json`. This file is **git-ignored** to prevent leaking secrets.
+
+**Steps to configure:**
+
+1.  Copy `.vscode/mcp.template.json` to `.vscode/mcp.json` if it does not exist.
+2.  Open `.vscode/mcp.json` and replace the placeholder token with your actual secret (matching `Authentication:ExpectedToken` in your app settings):
+
+```json
+{
+    "servers": {
+        "ae-identity-claims": {
+            "url": "http://localhost:8080/mcp/v1/claims/sse",
+            "type": "sse",
+            "headers": {
+                "Authorization": "Bearer my-secret-token"
+            }
+        }
+    },
+    "inputs": []
+}
+```
+
+3.  Restart the VS Code Agent or reload the window to apply the changes.

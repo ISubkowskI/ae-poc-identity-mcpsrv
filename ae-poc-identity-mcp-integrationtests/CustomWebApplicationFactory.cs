@@ -44,7 +44,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         });
 
         builder.UseEnvironment("Testing");
-        builder.UseSetting("App:Url", ""); // Prevent binding to fixed port
+        builder.UseSetting("App:Url", "http://localhost"); // Match Default TestServer functionality
+        builder.UseSetting("Authentication:ExpectedToken", "YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME");
     }
 
     public void SetupMockClaimClient()

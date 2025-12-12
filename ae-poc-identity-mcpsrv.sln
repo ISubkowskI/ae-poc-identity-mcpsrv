@@ -9,8 +9,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		LICENSE = LICENSE
 		.vscode\mcp.json = .vscode\mcp.json
-		.vscode\mcp.local.json = .vscode\mcp.local.json
+		.vscode\mcp.template.json = .vscode\mcp.template.json
 		README.md = README.md
+		SAMPLE_PROMPTS.md = SAMPLE_PROMPTS.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ae-poc-identity-mcp-srvsse", "ae-poc-identity-mcp-srvsse\ae-poc-identity-mcp-srvsse.csproj", "{AAFB8360-C318-4584-8CD4-EEC421B7EBCD}"

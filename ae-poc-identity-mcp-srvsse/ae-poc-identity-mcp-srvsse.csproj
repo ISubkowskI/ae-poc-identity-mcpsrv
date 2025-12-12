@@ -25,14 +25,14 @@
     <ProjectReference Include="..\ae-poc-identity-mcp-lib\ae-poc-identity-mcp-lib.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="appsettings.Development.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <DependentUpon>appsettings.json</DependentUpon>
-    </None>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Update="mcpsrvidentitysettings.Development.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<DependentUpon>mcpsrvidentitysettings.json</DependentUpon>
+		</None>
+		<None Update="mcpsrvidentitysettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
 </Project>

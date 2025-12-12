@@ -129,6 +129,39 @@ public class ClaimToolsIntegrationTests : IClassFixture<CustomWebApplicationFact
     }
 
     [Fact]
+    public async Task CreateClaimAsync_FromSamplePrompt_CreatesClaim_Integration()
+    {
+        // Arrange
+        // "Create a new role claim. The type should be `role`, value `Administrator2`, value type `string`, and display text `Admin Role2`, description `Administrator2 role with full permissions`."
+        var createDto = new ClaimCreateDto
+        {
+            Type = "role",
+            Value = "Administrator2",
+            ValueType = "string",
+            DisplayText = "Admin Role2",
+            Description = "Administrator2 role with full permissions"
+        };
+
+        // Act
+        var result = await _claimTools.CreateClaimAsync(createDto);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal("role", result.Value.Type);
+        Assert.Equal("Administrator2", result.Value.Value);
+        Assert.Equal("string", result.Value.ValueType);
+        Assert.Equal("Admin Role2", result.Value.DisplayText);
+        // Note: Description might not be returned in ClaimOutgoingDto depending on mapping, 
+        // but checking what we can. 
+        // Checking ClaimTools.cs -> CreateClaimAsync -> returns ClaimOutgoingDto.
+        // Let's assume description is not in ClaimOutgoingDto based on previous view_file of ClaimTools.cs (it used ClaimOutgoingDto).
+        // If Description is part of ClaimOutgoingDto, we could assert it. 
+        // But for now let's stick to the properties we know are there.
+        Assert.NotEqual(Guid.Empty, result.Value.Id);
+    }
+
+    [Fact]
     public async Task CreateClaimAsync_ReturnsValidationFailed_WhenDtoIsInvalid_Integration()
     {
         // Arrange
