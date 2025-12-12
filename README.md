@@ -1,7 +1,7 @@
 # ae-poc-identity-mcpsrv.sln
 #	ae-poc-identity-mcp-srvsse.csproj
 #	ae-poc-identity-mcp-lib.csproj
-This repository contains projects (.net c#, https://github.com/modelcontextprotocol/csharp-sdk) with examples of Model Context Protocol(MCP) server with SSE transport for Identity Claims API
+This repository contains projects (.net c#, https://github.com/modelcontextprotocol/csharp-sdk) with examples of Model Context Protocol (MCP) server with SSE transport for Identity Claims API
 This application communicates with a backend REST Web API to function. 
 
 ## Architecture Overview
@@ -37,7 +37,7 @@ graph TD
     lblK8s -- "HTTP GET (http://host:9007/health/...)" --> lblHealth
 ```
 
-## Communicating with the backend REST API
+## Communicating with the Backend REST API
 Before running the application, you need to ensure the required API service is running. Please start the `ae-sample-identity-webapi` service from the `sample-identity-jwt` repository. Refer to the instructions within the `sample-identity-jwt` repository to build and run the service.
 
 
@@ -69,6 +69,26 @@ readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 10
 ```
+
+## Running with .NET
+
+You can also run the MCP server using the .NET CLI
+
+1. Ensure the backend service is running (or accessible).
+2. Run:
+```bash
+dotnet run --project ae-poc-identity-mcp-srvsse/ae-poc-identity-mcp-srvsse.csproj --configpath=./ae-poc-identity-mcp-srvsse
+```
+
+## Running with Docker Compose
+The easiest way to run the application locally is using Docker Compose.
+
+1. Ensure the backend service is running (or accessible).
+2. Run:
+```bash
+docker-compose up --build
+```
+This will start the service on port `3001` (mapped to internal `8080`) and health checks on `9007`.
 
 ## Running with Docker
 

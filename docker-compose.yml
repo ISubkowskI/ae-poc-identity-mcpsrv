@@ -1,0 +1,15 @@
+services:
+  ae-poc-identity-mcp-srvsse:
+    build:
+      context: .
+      dockerfile: ae-poc-identity-mcp-srvsse/Dockerfile
+    ports:
+      - "3001:8080" # Map host 3001 to container 8080
+      - "9007:9007" # Health checks
+    environment:
+      - Authentication__ExpectedToken=YOUR_SECURE_TOKEN
+      - IdentityStorageApi__ApiUrl=http://host.docker.internal:5023
+      # - App__Name=MyMcpServer
+      # - App__Version=1.0.0
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # Allow access to host services
