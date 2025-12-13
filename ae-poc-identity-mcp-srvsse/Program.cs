@@ -84,7 +84,7 @@ try
     var appOptions = builder.Configuration.GetSection(AppOptions.App).Get<AppOptions>() ?? new AppOptions();
     var healthOptions = builder.Configuration.GetSection(HealthOptions.Health).Get<HealthOptions>() ?? new HealthOptions();
 
-    Log.Information("{AppName} ver:{AppVersion}", appOptions.Name, appOptions.Version);
+    Log.Information("{AppName} ver:'{AppVersion}'", appOptions.Name, appOptions.Version);
 
     // Add Authentication Services
     var srvAuthOptions = builder.Configuration.GetSection(ServerAuthenticationOptions.Authentication)
