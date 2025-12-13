@@ -1,8 +1,7 @@
-using Ae.Poc.Identity.Mcp.Services;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 
-namespace Ae.Poc.Identity.Mcp.SrvSse.Services;
+namespace Ae.Poc.Identity.Mcp.Services;
 
 public class ClaimClientHealthCheck : IHealthCheck
 {

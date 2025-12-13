@@ -1,5 +1,5 @@
 ﻿using Ae.Poc.Identity.Mcp.Settings;
-using Ae.Poc.Identity.Mcp.SrvSse.Services;
+using Ae.Poc.Identity.Mcp.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
