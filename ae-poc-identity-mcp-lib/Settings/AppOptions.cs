@@ -15,6 +15,8 @@
         /// </summary>
         public string Version { get; set; } = "?.?";
 
+        public string ClientId { get; set; } = "?-?";
+
         /// <summary>
         /// The base URL of the application.
         /// </summary>

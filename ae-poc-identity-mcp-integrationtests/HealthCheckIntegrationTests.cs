@@ -82,10 +82,11 @@ public class HealthCheckIntegrationTests : IClassFixture<CustomWebApplicationFac
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadAsStringAsync();
         
-        // Simple string checks for JSON structure to avoid adding System.Text.Json dependency if not present,
-        // but robust enough to verify the UIResponseWriter is working.
+        // Verify custom fields and structure
         content.Should().Contain("\"status\":\"Healthy\"");
-        content.Should().Contain("\"entries\":");
+        content.Should().Contain("\"version\":");
+        content.Should().Contain("\"clientId\":");
+        content.Should().Contain("\"results\":"); // Changed from 'entries' to 'results'
         content.Should().Contain("\"claim-api\":");
         content.Should().Contain("\"self\":");
     }
