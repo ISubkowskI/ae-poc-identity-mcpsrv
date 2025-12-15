@@ -49,7 +49,7 @@ public class ClaimToolsBenchmark
         };
 
         _claimClient = new FakeClaimClient(_testClaims);
-        var config = new MapperConfiguration(cfg => { cfg.AddProfile<DataProfile>(); }, _loggerFactory);
+        var config = new MapperConfiguration(cfg => { cfg.AddProfile<DataProfile>(); });
         _mapper = config.CreateMapper();
         _validator = new FakeValidator();
         _claimTools = new ClaimTools(_claimClient, _mapper, _validator, _loggerFactory.CreateLogger<ClaimTools>());

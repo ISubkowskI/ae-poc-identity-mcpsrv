@@ -17,18 +17,16 @@ public class ClaimToolsTests
     private readonly IMapper _mapper;
     private readonly Mock<IDtoValidator> _mockValidator;
     private readonly Mock<ILogger<ClaimTools>> _mockLogger;
-    private readonly Mock<ILoggerFactory> _mockLoggerFactory;
+
     private readonly ClaimTools _claimTools;
     
     public ClaimToolsTests()
     {
         _mockLogger = new Mock<ILogger<ClaimTools>>();
-        _mockLoggerFactory = new Mock<ILoggerFactory>();
-        _mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>()))
-            .Returns(_mockLogger.Object);
+
 
         _mockClaimClient = new Mock<IClaimClient>();
-        var config = new MapperConfiguration(cfg => cfg.AddProfile<DataProfile>(), _mockLoggerFactory.Object);
+        var config = new MapperConfiguration(cfg => cfg.AddProfile<DataProfile>());
         _mapper = config.CreateMapper();
         _mockValidator = new Mock<IDtoValidator>();
 

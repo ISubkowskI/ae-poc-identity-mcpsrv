@@ -15,11 +15,9 @@ public class MappingTests
     public void Mapping_ClaimsQueryIncomingDto_To_ClaimsQuery_ShouldWork()
     {
         // Arrange
-        var mockLoggerFactory = new Mock<ILoggerFactory>();
-        mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>()))
-            .Returns((new Mock<ILogger>()).Object);
 
-        var config = new MapperConfiguration(cfg => cfg.AddProfile<DataProfile>(), mockLoggerFactory.Object);
+
+        var config = new MapperConfiguration(cfg => cfg.AddProfile<DataProfile>());
         config.AssertConfigurationIsValid(); // Check for configuration errors
         var mapper = config.CreateMapper();
         var dto = new ClaimsQueryIncomingDto { Skipped = 10, NumberOf = 20 };
