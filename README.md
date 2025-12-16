@@ -20,7 +20,7 @@ graph TD
     end
 
     subgraph "MCP Server (this repository)"
-        lblMCPServer["MCP Server SSE transport<br/>(Implements MCP)<br/>Port: 8080 (default)"]
+        lblMCPServer["MCP Server SSE transport<br/>(Implements MCP)<br/>Port: 3033 (default)"]
         lblHealth["Health Checks / K8s Probes<br/>Port: 9007"]
     end
 
@@ -32,7 +32,7 @@ graph TD
         lblK8s["Liveness / Readiness Probes"]
     end
 
-    lblMCPClient -- "MCP over SSE (http://host:8080/mcp/v1/...)" <--> lblMCPServer
+    lblMCPClient -- "MCP over SSE (http://host:3033/mcp/v1/...)" <--> lblMCPServer
     lblMCPServer -- "HTTP/REST (http://host:5023/api/v1/...)" <--> lblBackendService
     lblK8s -- "HTTP GET (http://host:9007/health/...)" --> lblHealth
 ```
@@ -50,6 +50,33 @@ You can manually check the health of the service using the provided `health.http
 1. Open `ae-poc-identity-mcp-srvsse/health.http`.
 2. Ensure the application is running.
 3. Click "Send Request" above the `GET` request to verify the service status.
+
+### JSON Response Structure
+The health check endpoint returns a JSON object providing status details, versioning, and latency information:
+
+```json
+{
+  "status": "Healthy",
+  "results": {
+    "identitystorage-api": {
+      "status": "Healthy",
+      "description": "Claim API is reachable and ready.",
+      "duration": "00:00:00.0123456",
+      "version": "1.0.4",
+      "clientId": "ae-poc-identity-webapi",
+      "data": {}
+    },
+    "self": {
+      "status": "Healthy",
+      "description": null,
+      "duration": "00:00:00.0001234",
+      "version": "2.0.8",
+      "clientId": "ae-poc-identity-mcp-srvsse",
+      "data": {}
+    }
+  }
+}
+```
 
 ### Kubernetes Configuration
 Configure your Liveness and Readiness probes as follows:
@@ -88,7 +115,7 @@ The easiest way to run the application locally is using Docker Compose.
 ```bash
 docker-compose up -d --build
 ```
-This will start the service on port `3001` (mapped to internal `8080`) and health checks on `9007`.
+This will start the service on port `3033` (mapped to internal `3033`) and health checks on `9007`.
 
 ## Running with Docker
 
@@ -104,10 +131,10 @@ docker build -t ae-poc-identity-mcp-srvsse -f ae-poc-identity-mcp-srvsse/Dockerf
 ```
 
 ### Run the Container
-Run the container, mapping port 8080 to a host port (e.g., 3001). You can override configuration settings using environment variables.
+Run the container, mapping port 3033 to the host. You can override configuration settings using environment variables.
 
 ```bash
-docker run --rm -p 3001:8080 -p 9007:9007 \
+docker run --rm -p 3033:3033 -p 9007:9007 \
   -e Authentication__ExpectedToken="YOUR_SECURE_TOKEN" \
   -e IdentityStorageApi__ApiUrl="http://host.docker.internal:5023" \
   ae-poc-identity-mcp-srvsse
@@ -122,7 +149,7 @@ You can override any setting in `mcpsrvidentitysettings.json` using environment 
 - `IdentityStorageApi__ApiUrl`: The URL of the backend identity service (e.g. `http://0.0.0.0:5023`).
 - `App__Name`: The name of the MCP server application.
 - `App__Version`: The version of the MCP server application.
-- `App__Url`: The URL to bind the application to (e.g. `http://0.0.0.0:8080`).
+- `App__Url`: The URL to bind the application to (e.g. `http://0.0.0.0:3033`).
 
 ### Configuration Path
 The application loads configuration (`mcpsrvidentitysettings.json`) from the current working directory by default. You can override this location using:
@@ -148,7 +175,7 @@ The configuration should be placed in `.vscode/mcp.json`. This file is **git-ign
 {
     "servers": {
         "ae-identity-claims": {
-            "url": "http://localhost:8080/mcp/v1/claims/sse",
+            "url": "http://localhost:3033/mcp/v1/claims/sse",
             "type": "sse",
             "headers": {
                 "Authorization": "Bearer my-secret-token"
