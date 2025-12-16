@@ -1,0 +1,25 @@
+{
+  "Serilog": {
+    "MinimumLevel": "Information",
+    "WriteTo": [
+      {
+        "Name": "Console"
+      }
+    ],
+    "Enrich": [
+      "FromLogContext"
+    ]
+  },
+  "IdentityStorageApi": {
+    "ApiUrl": "http://localhost:5023",
+    "PortHealthCheck": 9008,
+    "LivePath": "/health/live",
+    "ReadyPath": "/health/ready"
+  },
+  "App": {
+    "Url": "http://localhost:8080"
+  },
+  "Authentication": {
+    "ExpectedToken": "YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME"
+  }
+}

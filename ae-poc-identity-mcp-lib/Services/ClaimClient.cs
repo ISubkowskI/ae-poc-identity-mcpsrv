@@ -12,7 +12,7 @@ namespace Ae.Poc.Identity.Mcp.Services;
 /// <summary>
 /// Client for interacting with the identity storage API for claim management.
 /// </summary>
-public sealed class ClaimClient : IClaimClient
+public sealed class ClaimClient : IClaimClient, IClaimClientHealth
 {
     private readonly ILogger<ClaimClient> _logger;
     private readonly HttpClient _httpClient;
@@ -237,5 +237,51 @@ public sealed class ClaimClient : IClaimClient
         }
     }
 
+    public async Task<DependencyHealthDto> GetHealthAsync(CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(_apiOptions.ApiUrl) || !_apiOptions.PortHealthCheck.HasValue || string.IsNullOrWhiteSpace(_apiOptions.ReadyPath))
+        {
+             return new DependencyHealthDto { IsReady = false };
+        }
+
+        try
+        {
+            var uriBuilder = new UriBuilder(_apiOptions.ApiUrl);
+            uriBuilder.Port = _apiOptions.PortHealthCheck.Value;
+            uriBuilder.Path = _apiOptions.ReadyPath;
+            uriBuilder.Query = string.Empty;
+            uriBuilder.Fragment = string.Empty;
+
+            var requestUri = uriBuilder.Uri;
+            _logger.LogDebug("Getting health for IdentityStorageApi at {RequestUri}", requestUri);
+
+            var response = await _httpClient.GetAsync(requestUri, ct).ConfigureAwait(false);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                 try 
+                 {
+                    var healthData = await response.Content.ReadFromJsonAsync<DependencyHealthDto>(cancellationToken: ct).ConfigureAwait(false);
+                    if (healthData != null)
+                    {
+                        return healthData with { IsReady = true };
+                    }
+                 }
+                 catch (Exception ex)
+                 {
+                     _logger.LogWarning(ex, "Failed to parse health JSON from IdentityStorageApi.");
+                 }
+                 return new DependencyHealthDto { IsReady = true }; // It was 200 OK, even if parse failed? Or maybe partial parsing.
+                 // Actually, if we want version/clientId, we rely on parsing.
+            }
+            
+            return new DependencyHealthDto { IsReady = false };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Health check failed for IdentityStorageApi.");
+            return new DependencyHealthDto { IsReady = false };
+        }
+    }
 
 }

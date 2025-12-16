@@ -86,7 +86,7 @@ The easiest way to run the application locally is using Docker Compose.
 1. Ensure the backend service is running (or accessible).
 2. Run:
 ```bash
-docker-compose up --build
+docker-compose up -d --build
 ```
 This will start the service on port `3001` (mapped to internal `8080`) and health checks on `9007`.
 
