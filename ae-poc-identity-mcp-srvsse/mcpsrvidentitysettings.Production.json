@@ -17,7 +17,7 @@
     "ReadyPath": "/health/ready"
   },
   "App": {
-    "Url": "http://localhost:8080"
+    "Url": "http://0.0.0.0:3033"
   },
   "Authentication": {
     "ExpectedToken": "YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME"

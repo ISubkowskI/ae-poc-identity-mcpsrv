@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: ae-poc-identity-mcp-srvsse/Dockerfile
     ports:
-      - "8080:8080" # Map host 8080 to container 8080
+      - "3033:3033" # Map host 3033 to container 8080
       - "9007:9007" # Health checks
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
