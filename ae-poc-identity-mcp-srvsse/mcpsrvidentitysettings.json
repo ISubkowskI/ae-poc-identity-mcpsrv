@@ -12,7 +12,7 @@
   },
   "IdentityStorageApi": {
     "ApiUrl": "",
-    "ApiBasePath": "/api/v1",
+    "ApiBasePath": "/api/v2",
     "PortHealthCheck": 9008,
     "LivePath": "/health/live",
     "ReadyPath": "/health/ready"
