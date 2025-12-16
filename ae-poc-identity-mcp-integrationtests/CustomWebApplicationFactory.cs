@@ -21,26 +21,22 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     }
 
     public Mock<IClaimClient> MockClaimClient { get; } = new Mock<IClaimClient>();
+    public Mock<IClaimClientHealth> MockClaimClientHealth { get; } = new Mock<IClaimClientHealth>();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices(services =>
         {
             // Remove the existing IClaimClient registration
-            var descriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(IClaimClient));
-            if (descriptor != null)
-            {
-                services.Remove(descriptor);
-            }
+            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IClaimClient));
+            if (descriptor != null) services.Remove(descriptor);
 
-            // Remove the HttpClient registration for IClaimClient
-            var httpClientDescriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(IHttpClientFactory));
-            // Note: We can't easily remove HttpClient factory, so we override IClaimClient instead
+            var descriptorHealth = services.SingleOrDefault(d => d.ServiceType == typeof(IClaimClientHealth));
+            if (descriptorHealth != null) services.Remove(descriptorHealth);
 
-            // Add mocked IClaimClient
+            // Add mocked IClaimClient and IClaimClientHealth
             services.AddScoped<IClaimClient>(_ => MockClaimClient.Object);
+            services.AddScoped<IClaimClientHealth>(_ => MockClaimClientHealth.Object);
         });
 
         builder.UseEnvironment("Testing");
@@ -51,6 +47,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     public void SetupMockClaimClient()
     {
         MockClaimClient.Reset();
+        MockClaimClientHealth.Reset();
 
         // Setup default mock behaviors
         var testClaims = new List<AppClaim>
@@ -64,6 +61,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
         MockClaimClient.Setup(c => c.GetClaimsInfoAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ClaimsInfo { TotalCount = testClaims.Count });
+        
+        MockClaimClientHealth.Setup(c => c.GetHealthAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Ae.Poc.Identity.Mcp.Dtos.DependencyHealthDto { IsReady = true, Version = "1.0.0", ClientId = "test-client" });
 
         MockClaimClient.Setup(c => c.LoadClaimDetailsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((string id, CancellationToken ct) =>

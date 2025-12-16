@@ -30,18 +30,18 @@ public class HealthCheckIntegrationTests : IClassFixture<CustomWebApplicationFac
         var client = _factory.CreateClient();
         
         // Mock backend to return success
-        _factory.MockClaimClient
-            .Setup(c => c.GetClaimsInfoAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ClaimsInfo { TotalCount = 10 });
+        _factory.MockClaimClientHealth
+            .Setup(c => c.GetHealthAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Ae.Poc.Identity.Mcp.Dtos.DependencyHealthDto { IsReady = true, Version = "1.0", ClientId = "test" });
 
         // Act
         var response = await client.GetAsync("http://localhost:9007/health/ready");
 
         // Assert
-        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadAsStringAsync();
         content.Should().Contain("\"status\":\"Healthy\"");
+        content.Should().Contain("identitystorage-api");
     }
 
     [Fact]
@@ -50,10 +50,10 @@ public class HealthCheckIntegrationTests : IClassFixture<CustomWebApplicationFac
         // Arrange
         var client = _factory.CreateClient();
 
-        // Mock backend to throw exception
-        _factory.MockClaimClient
-            .Setup(c => c.GetClaimsInfoAsync(It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new Exception("Backend down"));
+        // Mock backend to return not ready
+        _factory.MockClaimClientHealth
+            .Setup(c => c.GetHealthAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Ae.Poc.Identity.Mcp.Dtos.DependencyHealthDto { IsReady = false });
 
         // Act
         var response = await client.GetAsync("http://localhost:9007/health/ready");
@@ -71,9 +71,9 @@ public class HealthCheckIntegrationTests : IClassFixture<CustomWebApplicationFac
         var client = _factory.CreateClient();
         
         // Mock backend to return success
-        _factory.MockClaimClient
-            .Setup(c => c.GetClaimsInfoAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ClaimsInfo { TotalCount = 10 });
+        _factory.MockClaimClientHealth
+            .Setup(c => c.GetHealthAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Ae.Poc.Identity.Mcp.Dtos.DependencyHealthDto { IsReady = true, Version = "1.0", ClientId = "test" });
 
         // Act
         var response = await client.GetAsync("http://localhost:9007/health/ready");
@@ -84,11 +84,10 @@ public class HealthCheckIntegrationTests : IClassFixture<CustomWebApplicationFac
         
         // Verify custom fields and structure
         content.Should().Contain("\"status\":\"Healthy\"");
-        content.Should().Contain("\"version\":");
-        content.Should().Contain("\"clientId\":");
-        content.Should().Contain("\"results\":"); // Changed from 'entries' to 'results'
-        content.Should().Contain("\"claim-api\":");
+        content.Should().Contain("\"results\":");
+        content.Should().Contain("\"identitystorage-api\":");
         content.Should().Contain("\"self\":");
+        content.Should().Contain("\"duration\":"); // Added duration check
     }
 
     [Fact]
