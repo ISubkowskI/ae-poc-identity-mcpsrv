@@ -70,7 +70,7 @@ try
 
     builder.Services.AddScoped<IDtoValidator, DtoValidator>();
     builder.Services.AddScoped<IClaimTools, ClaimTools>();
-    builder.Services.AddHttpClient<IClaimClient, ClaimClient>()
+    builder.Services.AddHttpClient<ClaimClient>()
         .ConfigureHttpClient(client =>
         {
             client.Timeout = TimeSpan.FromSeconds(30);
@@ -80,6 +80,9 @@ try
             PooledConnectionLifetime = TimeSpan.FromMinutes(15),
             MaxConnectionsPerServer = 25
         });
+
+    builder.Services.AddTransient<IClaimClient>(s => s.GetRequiredService<ClaimClient>());
+    builder.Services.AddTransient<IClaimClientHealth>(s => s.GetRequiredService<ClaimClient>());
 
     var appOptions = builder.Configuration.GetSection(AppOptions.App).Get<AppOptions>() ?? new AppOptions();
     var healthOptions = builder.Configuration.GetSection(HealthOptions.Health).Get<HealthOptions>() ?? new HealthOptions();

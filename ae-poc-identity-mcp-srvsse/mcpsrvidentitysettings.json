@@ -12,11 +12,14 @@
   },
   "IdentityStorageApi": {
     "ApiUrl": "",
-    "ApiBasePath": "/api/v1"
+    "ApiBasePath": "/api/v2",
+    "PortHealthCheck": 9008,
+    "LivePath": "/health/live",
+    "ReadyPath": "/health/ready"
   },
   "App": {
     "Name": "Claims MCP Server 'SSE'",
-    "Version": "2.0.7",
+    "Version": "2.0.8",
     "ClientId": "ae-poc-identity-mcp-srvsse",
     "Url": "",
     "MapMcpPattern": "/mcp/v1/claims"

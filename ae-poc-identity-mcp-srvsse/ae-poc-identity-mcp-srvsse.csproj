@@ -30,6 +30,10 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<DependentUpon>mcpsrvidentitysettings.json</DependentUpon>
 		</None>
+		<None Update="mcpsrvidentitysettings.Production.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<DependentUpon>mcpsrvidentitysettings.json</DependentUpon>
+		</None>
 		<None Update="mcpsrvidentitysettings.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

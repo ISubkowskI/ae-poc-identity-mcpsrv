@@ -6,6 +6,12 @@ This content describes how to interact with the `ae-identity-claims` MCP server 
 
 **Prompt:**
 ```text
+Do you know 'ae-identity-claims' MCP server?
+```
+```text
+Sind Sie mit dem MCP-Server „ae-identity-claims“ vertraut? (Antwort auf Deutsch)
+```
+```text
 What version of the identity claims server is currently running?
 ```
 

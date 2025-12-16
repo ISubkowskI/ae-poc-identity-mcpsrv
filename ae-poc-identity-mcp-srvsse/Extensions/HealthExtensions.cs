@@ -12,7 +12,7 @@ namespace Ae.Poc.Identity.Mcp.Extensions
     {
         internal static IHealthChecksBuilder AddApplicationHealthChecks(this IServiceCollection services) =>
           services.AddHealthChecks()
-            .AddCheck<ClaimClientHealthCheck>("claim-api")
+            .AddCheck<ClaimClientHealthCheck>("identitystorage-api")
             .AddCheck("self", () => HealthCheckResult.Healthy());
 
         internal static void MapApplicationHealthChecks(this WebApplication webapp, HealthOptions healthOptions)
@@ -42,20 +42,38 @@ namespace Ae.Poc.Identity.Mcp.Extensions
         {
             context.Response.ContentType = "application/json; charset=utf-8";
 
-            var options = context.RequestServices.GetRequiredService<Microsoft.Extensions.Options.IOptions<AppOptions>>().Value;
+            var appOptions = context.RequestServices.GetRequiredService<Microsoft.Extensions.Options.IOptions<AppOptions>>().Value;
 
             var json = new
             {
                 status = result.Status.ToString(),
-                version = options.Version,
-                clientId = options.ClientId,
                 results = result.Entries.ToDictionary(
                     e => e.Key,
-                    e => new
-                    {
-                        status = e.Value.Status.ToString(),
-                        description = e.Value.Description,
-                        data = e.Value.Data
+                    e => {
+                         var data = new Dictionary<string, object>(e.Value.Data);
+                         object? versionObj = null;
+                         object? clientIdObj = null;
+
+                         if (e.Key == "self")
+                         {
+                             versionObj = appOptions.Version;
+                             clientIdObj = appOptions.ClientId;
+                         }
+                         else
+                         {
+                             data.Remove("version", out versionObj);
+                             data.Remove("clientId", out clientIdObj);
+                         }
+
+                         return new
+                         {
+                             status = e.Value.Status.ToString(),
+                             description = e.Value.Description,
+                             duration = e.Value.Duration,
+                             version = versionObj,
+                             clientId = clientIdObj,
+                             data = data
+                         };
                     })
             };
 

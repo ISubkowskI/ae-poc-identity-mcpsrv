@@ -5,10 +5,10 @@ namespace Ae.Poc.Identity.Mcp.Services;
 
 public class ClaimClientHealthCheck : IHealthCheck
 {
-    private readonly IClaimClient _claimClient;
+    private readonly IClaimClientHealth _claimClient;
     private readonly ILogger<ClaimClientHealthCheck> _logger;
 
-    public ClaimClientHealthCheck(IClaimClient claimClient, ILogger<ClaimClientHealthCheck> logger)
+    public ClaimClientHealthCheck(IClaimClientHealth claimClient, ILogger<ClaimClientHealthCheck> logger)
     {
         _claimClient = claimClient;
         _logger = logger;
@@ -18,13 +18,20 @@ public class ClaimClientHealthCheck : IHealthCheck
     {
         try
         {
-            var info = await _claimClient.GetClaimsInfoAsync(cancellationToken).ConfigureAwait(false);
-            if (info != null)
+            var dependencyHealthDto = await _claimClient.GetHealthAsync(cancellationToken).ConfigureAwait(false);
+            
+            var data = new Dictionary<string, object>
             {
-                return HealthCheckResult.Healthy("Claim API is reachable.");
+                { "version", dependencyHealthDto.Version ?? "unknown" },
+                { "clientId", dependencyHealthDto.ClientId ?? "unknown" }
+            };
+
+            if (dependencyHealthDto.IsReady)
+            {
+                return HealthCheckResult.Healthy("Claim API is reachable and ready.", data);
             }
             
-            return HealthCheckResult.Unhealthy("Claim API returned null info.");
+            return HealthCheckResult.Unhealthy("Claim API is not ready.", data: data);
         }
         catch (Exception ex)
         {

@@ -1,15 +1,18 @@
+name: ae-poc-identity
 services:
-  ae-poc-identity-mcp-srvsse:
+  identity-mcp:
+    image: identity-mcp:v2.0.8
+    container_name: ae-poc-identity-mcp-srvsse
     build:
       context: .
       dockerfile: ae-poc-identity-mcp-srvsse/Dockerfile
     ports:
-      - "3001:8080" # Map host 3001 to container 8080
+      - "3033:3033" # Map host 3033 to container 8080
       - "9007:9007" # Health checks
     environment:
+      - ASPNETCORE_ENVIRONMENT=Production
       - Authentication__ExpectedToken=YOUR_SUPER_SECRET_AND_UNIQUE_TOKEN_REPLACE_ME
       - IdentityStorageApi__ApiUrl=http://host.docker.internal:5023
-      # - App__Name=MyMcpServer
-      # - App__Version=1.0.0
+    restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway" # Allow access to host services

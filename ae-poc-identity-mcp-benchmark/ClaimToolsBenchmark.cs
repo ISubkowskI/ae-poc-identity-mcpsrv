@@ -111,7 +111,7 @@ public class ClaimToolsBenchmark
         if (result == null) throw new InvalidOperationException("Result is null");
     }
 
-    private sealed class FakeClaimClient : IClaimClient
+    private sealed class FakeClaimClient : IClaimClient, IClaimClientHealth
     {
         private readonly List<AppClaim> _claims;
 
@@ -131,6 +131,8 @@ public class ClaimToolsBenchmark
             return Task.FromResult(appClaim);
         }
         public Task<AppClaim> UpdateClaimAsync(string claimId, AppClaim appClaim, CancellationToken ct = default) => Task.FromResult(appClaim);
+
+        public Task<DependencyHealthDto> GetHealthAsync(CancellationToken ct = default) => Task.FromResult(new DependencyHealthDto { IsReady = true, Version = "0.0.0", ClientId = "fake-client" });
     }
 
     private sealed class FakeValidator : IDtoValidator

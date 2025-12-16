@@ -1,4 +1,5 @@
 @baseUrl = http://localhost:9007
+@APIbaseUrl = http://localhost:9008
 
 ### Liveness Probe (Self)
 GET {{baseUrl}}/health/live
@@ -6,4 +7,15 @@ Accept: application/json
 
 ### Readiness Probe (Dependencies)
 GET {{baseUrl}}/health/ready
+Accept: application/json
+
+
+
+### API Identity Storage (uses APIbaseUrl)
+### Liveness Probe (Self)
+GET {{APIbaseUrl}}/health/live
+Accept: application/json
+
+### Readiness Probe (Dependencies)
+GET {{APIbaseUrl}}/health/ready
 Accept: application/json
