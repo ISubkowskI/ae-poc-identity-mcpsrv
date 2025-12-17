@@ -20,12 +20,12 @@ graph TD
     end
 
     subgraph "MCP Server (this repository)"
-        lblMCPServer["MCP Server SSE transport<br/>(Implements MCP)<br/>Port: 3033 (default)"]
+        lblMCPServer["MCP Server SSE transport<br/>(Implements MCP)<br/>Port: 3033"]
         lblHealth["Health Checks / K8s Probes<br/>Port: 9007"]
     end
 
     subgraph "Backend Service (REST API)"
-        lblBackendService["External repository<br/>sample-identity-jwt<br/>ae-sample-identity-webapi.csproj"]
+        lblBackendService["External repository<br/>ae-poc-identity-webapi"]
     end
     
     subgraph "Kubernetes / Monitoring"
@@ -33,12 +33,12 @@ graph TD
     end
 
     lblMCPClient -- "MCP over SSE (http://host:3033/mcp/v1/...)" <--> lblMCPServer
-    lblMCPServer -- "HTTP/REST (http://host:5023/api/v1/...)" <--> lblBackendService
+    lblMCPServer -- "HTTP/REST (http://host:5023/api/v2/...)" <--> lblBackendService
     lblK8s -- "HTTP GET (http://host:9007/health/...)" --> lblHealth
 ```
 
 ## Communicating with the Backend REST API
-Before running the application, you need to ensure the required API service is running. Please start the `ae-sample-identity-webapi` service from the `sample-identity-jwt` repository. Refer to the instructions within the `sample-identity-jwt` repository to build and run the service.
+Before running the application, you need to ensure the required API service is running. Please start the `ae-poc-identity-webapi` service from the `ae-poc-identity-webapi` repository. Refer to the instructions within the `ae-poc-identity-webapi` repository to build and run the service.
 
 
 ## Testing the MCP Server
